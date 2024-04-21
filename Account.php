@@ -31,13 +31,13 @@ class Account
     } else {
       $password = password_hash($password, PASSWORD_ARGON2ID);
 
-      $query_insert_account = $database->query('
+      $is_insert_successful = $database->query('
         INSERT INTO `Accounts`
           (`id`, `name`, `password`)
         VALUES (UUID(), ?, ?)
-      ', [$name, $password]);
+      ', [$name, $password])->affected_rows > 0;
 
-      if ($query_insert_account->affected_rows > 0) {
+      if ($is_insert_successful) {
         $id = $database->get_connection()->insert_id;
         return new Account($id, $name, $password);
       } else {
