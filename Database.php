@@ -8,7 +8,7 @@ class Database
     ?string $host = 'localhost',
     ?string $user = 'root',
     ?string $password = '',
-    ?string $schema = 'final_project',
+    ?string $schema = 'db_final_project',
     ?string $port = '3306'
   )
   {

@@ -1,3 +1,7 @@
+CREATE SCHEMA `db_final_project`;
+
+USE `db_final_project`;
+
 CREATE TABLE `Accounts`
 (
     `id`       VARCHAR(63)  NOT NULL PRIMARY KEY,
