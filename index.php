@@ -12,16 +12,18 @@ require_once 'Session.php';
 </head>
 <body>
   <?php
-  //  unset($_SESSION);
   if (Session::get('account') === null) {
     header('Location: ./auth');
-    die();
+    exit();
   } else {
-    echo '
-    <h1>Welcome ' . Session::get('account')['name'] . '!</h1>
-  ';
+    ?>
+      <h1>Welcome <?=Session::get('account')['name']?>!</h1>
+      <form method="POST" action="Account.php">
+      <input type="hidden" name="auth_type" required value="logout"/>
+        <input type="submit" value="Logout"/>
+      </form>
+    <?php
   }
-  echo Session::get('error');
   ?>
 </body>
 </html>

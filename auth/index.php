@@ -1,5 +1,9 @@
 <?php
 require_once '../Session.php';
+
+$name = htmlspecialchars(Session::get('auth_form')['name']);
+$password = htmlspecialchars(Session::get('auth_form')['password']);
+$is_registering = Session::get('auth_form')['auth_type'] === 'register';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,22 +15,31 @@ require_once '../Session.php';
   <title>Auth</title>
 </head>
 <body>
-  <?php
-  //  unset($_SESSION);
-  echo '
-    <form method="POST" action="../Account.php">
-      <input type="hidden" name="auth_type" required value="register" id="authTypeInput"/>
-      <input type="text" name="name" required placeholder="Name"/>
-      <input type="password" name="password" placeholder="Password" required/>
-      <input type="submit" value="Register" id="submitButton"/>
-    </form>
-  ';
-  echo Session::get('error');
-  ?>
+  <form method="POST" action="../Account.php">
+    <input type="hidden" name="auth_type" required value="login" id="authTypeInput"/>
 
+    <label for="name">
+      Name
+      <input type="text" name="name" required
+        <?=$name ? 'value="'.$name.'"' : ''?>
+      />
+    </label>
+
+    <label for="password">
+      Password
+      <input type="password" name="password" required
+        <?=$password ? 'value="' . $password . '"' : ''?>
+      />
+    </label>
+
+    <input type="submit" value="Login" id="submitButton"/>
+  </form>
+    
   <button onclick="toggleAuthType()" id="authTypeToggle">
-    Already have an account? Login instead
+    Don't have an account? Register one
   </button>
+
+  <?=Session::get('error')?>
 
   <script>
     function toggleAuthType() {
@@ -42,6 +55,8 @@ require_once '../Session.php';
         ? "Don't have an account? Register one"
         : "Already have an account? Login instead"
     }
+
+    <?php if($is_registering) { echo 'toggleAuthType()'; }?>
   </script>
 </body>
 </html>

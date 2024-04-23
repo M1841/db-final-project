@@ -15,11 +15,6 @@ class Database
     $this->connection = new mysqli($host, $user, $password, $schema, $port);
   }
 
-  public function get_connection(): mysqli
-  {
-    return $this->connection;
-  }
-
   /**
    * @throws Exception
    */

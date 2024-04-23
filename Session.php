@@ -5,9 +5,9 @@ class Session
   public static function init(): void
   {
     session_set_cookie_params([
-      'lifetime' => 0,
+      'lifetime' => 60 * 60,
       'path' => '/',
-      'domain' => $_SERVER['HTTP_HOST'],
+      'domain' => '',
       'secure' => false,
       'httponly' => true,
       'samesite' => 'Lax'
@@ -36,7 +36,7 @@ class Session
   public static function unset(?string $key = NULL): void
   {
     if (!isset($key)) {
-      unset($_SESSION);
+      session_unset();
     } else {
       unset($_SESSION[$key]);
     }
