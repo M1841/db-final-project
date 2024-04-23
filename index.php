@@ -1,5 +1,5 @@
 <?php
-require_once 'Session.php';
+require_once './lib/Session.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +8,7 @@ require_once 'Session.php';
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>db_final_project</title>
+  <title>Home</title>
 </head>
 <body>
   <?php
@@ -17,11 +17,11 @@ require_once 'Session.php';
     exit();
   } else {
     ?>
-      <h1>Welcome <?=Session::get('account')['name']?>!</h1>
-      <form method="POST" action="Account.php">
+    <h1>Welcome <?= Session::get('account')['name'] ?>!</h1>
+    <form method="POST" action="./lib/Account.php">
       <input type="hidden" name="auth_type" required value="logout"/>
-        <input type="submit" value="Logout"/>
-      </form>
+      <input type="submit" value="Logout"/>
+    </form>
     <?php
   }
   ?>

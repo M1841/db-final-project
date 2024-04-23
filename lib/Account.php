@@ -1,6 +1,6 @@
 <?php
-require_once 'Session.php';
-require_once 'Database.php';
+require_once './Session.php';
+require_once './Database.php';
 
 class Account
 {
@@ -64,19 +64,19 @@ class Account
             'auth_type' => $auth_type
           ]);
 
-          header('Location: ./');
+          header('Location: ../');
           exit();
         }
       }
       case IS_LOGGING_OUT:
       {
         Session::unset('account');
-        header('Location: ./');
+        header('Location: ../');
         exit();
       }
       default:
       {
-        header('Location: ./');
+        header('Location: ../');
         exit();
       }
     }
@@ -85,7 +85,7 @@ class Account
   /**
    * @throws Exception
    */
-  public static function register(string $name, string $password): Account
+  private static function register(string $name, string $password): Account
   {
     $database = new Database();
 
@@ -101,7 +101,7 @@ class Account
       if ($is_insert_successful) {
         $id = $database->query('
           SELECT `id`
-          FROM `Accounts`
+          FROM `accounts`
           WHERE `name` = ?
         ', [$name])->get_result()->fetch_assoc()['id'];
 
@@ -117,12 +117,12 @@ class Account
   /**
    * @throws Exception
    */
-  public static function is_registered(string $name): bool
+  private static function is_registered(string $name): bool
   {
     $database = new Database();
     return $database->query('
-      SELECT COUNT(`id`) as `count`
-      FROM `Accounts`
+      SELECT COUNT(`id`) AS `count`
+      FROM `accounts`
       WHERE `name` = ?
     ', [$name])->get_result()->fetch_assoc()['count'] > 0;
   }
@@ -130,14 +130,14 @@ class Account
   /**
    * @throws Exception
    */
-  public static function login(string $name, string $password): Account
+  private static function login(string $name, string $password): Account
   {
     $database = new Database();
 
     if (Account::is_registered($name)) {
       $aux_query = $database->query('
         SELECT `id`, `password`
-        FROM `Accounts`
+        FROM `accounts`
         WHERE `name` = ?
       ', [$name])->get_result()->fetch_assoc();
 
