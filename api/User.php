@@ -1,19 +1,13 @@
 <?php
-require_once './Session.php';
-require_once './Database.php';
+require_once __DIR__ . '/Session.php';
+require_once __DIR__ . '/Database.php';
 
-class Account
+readonly class User
 {
-  private string $id;
-  private string $name;
-  private string $password;
-
-  private function __construct(string $id, string $name, string $password)
-  {
-    $this->id = $id;
-    $this->name = $name;
-    $this->password = $password;
-  }
+  public function __construct(
+    public string $id,
+    public string $name
+  ) {}
 
   public static function controller(): void
   {
@@ -41,14 +35,11 @@ class Account
         $auth_type = $_POST['auth_type'];
 
         try {
-          $account = $auth_type === 'register'
-            ? Account::register($name, $password)
-            : Account::login($name, $password);
+          $user = $auth_type === 'register'
+            ? User::register($name, $password)
+            : User::login($name, $password);
 
-          Session::set('account', [
-            'id' => $account->id,
-            'name' => $account->name
-          ]);
+          Session::set('user', $user);
 
           Session::unset('error');
         } catch (Exception $err) {
@@ -67,17 +58,19 @@ class Account
           header('Location: ../');
           exit();
         }
+        break;
       }
       case IS_LOGGING_OUT:
       {
-        Session::unset('account');
+        Session::unset('user');
         header('Location: ../');
         exit();
+        break;
       }
       default:
       {
-        header('Location: ../');
-        exit();
+//        header('Location: ../');
+//        exit();
       }
     }
   }
@@ -85,83 +78,75 @@ class Account
   /**
    * @throws Exception
    */
-  private static function register(string $name, string $password): Account
+  private static function register(string $name, string $password): User
   {
     $database = new Database();
 
-    if (!Account::is_registered($name)) {
+    if (!User::is_registered($name)) {
       $password = password_hash($password, PASSWORD_ARGON2ID);
 
+      $id = $database->generate_id();
+
       $is_insert_successful = $database->query('
-        INSERT INTO `Accounts` 
+        INSERT INTO `users` 
           (`id`, `name`, `password`)
-        VALUES (UUID(), ?, ?)
-      ', [$name, $password])->affected_rows > 0;
+        VALUES (?, ?, ?)
+      ', [$id, $name, $password])->affected_rows > 0;
 
       if ($is_insert_successful) {
-        $id = $database->query('
-          SELECT `id`
-          FROM `accounts`
-          WHERE `name` = ?
-        ', [$name])->get_result()->fetch_assoc()['id'];
-
-        return new Account($id, $name, $password);
+        return new User($id, $name);
       } else {
         throw new Exception('A database error has occurred. Try again later.');
       }
     } else {
-      throw new Exception('Account name is taken');
+      throw new Exception('User name is taken');
     }
   }
 
   /**
    * @throws Exception
    */
-  private static function is_registered(string $name): bool
+  public static function is_registered(string $identifier): bool
   {
     $database = new Database();
     return $database->query('
       SELECT COUNT(`id`) AS `count`
-      FROM `accounts`
+      FROM `users`
       WHERE `name` = ?
-    ', [$name])->get_result()->fetch_assoc()['count'] > 0;
+        OR `id` = ?
+    ', [$identifier, $identifier])->get_result()->fetch_assoc()['count'] > 0;
   }
 
   /**
    * @throws Exception
    */
-  private static function login(string $name, string $password): Account
+  private static function login(string $name, string $password): User
   {
     $database = new Database();
 
-    if (Account::is_registered($name)) {
+    if (User::is_registered($name)) {
+
       $aux_query = $database->query('
         SELECT `id`, `password`
-        FROM `accounts`
+        FROM `users`
         WHERE `name` = ?
       ', [$name])->get_result()->fetch_assoc();
 
+      $id = $aux_query['id'];
       $correct_password = $aux_query['password'];
+
       $is_password_correct = password_verify($password, $correct_password);
 
       if ($is_password_correct) {
-        $id = $aux_query['id'];
-        return new Account($id, $name, $password);
+        return new User($id, $name);
       } else {
         throw new Exception('Incorrect password');
       }
     } else {
-      throw new Exception('Account does not exist');
+      throw new Exception('User does not exist');
     }
   }
 
-  public function __get(string $property): mixed
-  {
-    if ($property !== 'password' && property_exists($this, $property)) {
-      return $this->$property;
-    }
-    return NULL;
-  }
 }
 
-Account::controller();
+User::controller();

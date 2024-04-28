@@ -1,9 +1,13 @@
 <?php
-require_once '../lib/Session.php';
+require_once __DIR__ . '/../api/Session.php';
 
-$name = htmlspecialchars(Session::get('auth_form')['name']);
-$password = htmlspecialchars(Session::get('auth_form')['password']);
-$is_registering = Session::get('auth_form')['auth_type'] === 'register';
+$name = $password = $is_registering = NULL;
+
+if ($auth_form = Session::get('auth_form')) {
+  $name = htmlspecialchars($auth_form['name']);
+  $password = htmlspecialchars($auth_form['password']);
+  $is_registering = $auth_form['auth_type'] === 'register';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -15,14 +19,14 @@ $is_registering = Session::get('auth_form')['auth_type'] === 'register';
   <title>Authenticate</title>
 </head>
 <body>
-  <form method="POST" action="../lib/Account.php">
+  <form method="POST" action="../api/User.php">
     <input type="hidden" name="auth_type" required value="login" id="authTypeInput"/>
 
     <label for="name">
       Name
       <input type="text" name="name" required
         minlength="3" maxlength="32"
-        <?= $name ? 'value="' . $name . '"' : '' ?>
+        <?= $name ? ('value="' . $name . '"') : '' ?>
       />
     </label>
 
@@ -30,7 +34,7 @@ $is_registering = Session::get('auth_form')['auth_type'] === 'register';
       Password
       <input type="password" name="password" required
         minlength="8" maxlength="32"
-        <?= $password ? 'value="' . $password . '"' : '' ?>
+        <?= $password ? ('value="' . $password . '"') : '' ?>
       />
     </label>
 

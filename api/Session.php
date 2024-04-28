@@ -1,6 +1,6 @@
 <?php
 
-class Session
+readonly class Session
 {
   public static function init(): void
   {
@@ -15,7 +15,7 @@ class Session
     session_start();
   }
 
-  public static function set(string $key, string|array $value): void
+  public static function set(string $key, mixed $value): void
   {
     $_SESSION[$key] = $value;
   }

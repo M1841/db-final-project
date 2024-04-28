@@ -1,5 +1,13 @@
 <?php
-require_once './lib/Session.php';
+require_once __DIR__ . '/api/User.php';
+require_once __DIR__ . '/api/Session.php';
+
+$user = Session::get('user');
+
+if ($user === NULL) {
+  header('Location: ' . __DIR__ . './auth');
+  exit();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,19 +19,11 @@ require_once './lib/Session.php';
   <title>Home</title>
 </head>
 <body>
-  <?php
-  if (Session::get('account') === null) {
-    header('Location: ./auth');
-    exit();
-  } else {
-    ?>
-    <h1>Welcome <?= Session::get('account')['name'] ?>!</h1>
-    <form method="POST" action="./lib/Account.php">
-      <input type="hidden" name="auth_type" required value="logout"/>
-      <input type="submit" value="Logout"/>
-    </form>
-    <?php
-  }
-  ?>
+  <h1>Welcome <?= $user->name ?>!</h1>
+  <a href="/teams">Your Teams</a>
+  <form method="POST" action="./api/User.php">
+    <input type="hidden" name="auth_type" required value="logout"/>
+    <input type="submit" value="Logout"/>
+  </form>
 </body>
 </html>
