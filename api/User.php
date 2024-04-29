@@ -45,9 +45,7 @@ readonly class User
         } catch (Exception $err) {
           Session::unset();
 
-          Session::set('error', '
-            <p style="color: #d93030">' . $err->getMessage() . '</p>
-          ');
+          Session::set('error', $err->getMessage());
         } finally {
           Session::set('auth_form', [
             'name' => $name,
@@ -148,5 +146,7 @@ readonly class User
   }
 
 }
+
+var_dump($_POST);
 
 User::controller();

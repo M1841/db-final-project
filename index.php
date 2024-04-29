@@ -5,7 +5,7 @@ require_once __DIR__ . '/api/Session.php';
 $user = Session::get('user');
 
 if ($user === NULL) {
-  header('Location: ' . __DIR__ . './auth');
+  header('Location: ./auth');
   exit();
 }
 ?>

@@ -5,7 +5,7 @@ readonly class Session
   public static function init(): void
   {
     session_set_cookie_params([
-      'lifetime' => 60 * 60,
+      'lifetime' => PHP_INT_MAX,
       'path' => '/',
       'domain' => '',
       'secure' => false,
