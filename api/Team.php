@@ -7,7 +7,7 @@ readonly class Team
     public string $name
   ) {}
 
-  public static function controller(): void {}
+  public static function router(): void {}
 
   /**
    * @throws Exception

@@ -24,15 +24,14 @@ if ($auth_form = Session::get('auth_form')) {
     href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"
     rel="stylesheet">
 
-  <script src="../lib/vue.min.js"></script>
   <script src="../lib/tailwind.min.js"></script>
+  <script src="../lib/vue.min.js"></script>
   <!--  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.26/vue.global.min.js"></script>-->
 </head>
-<body class="h-screen" style="font-family: Inter, sans-serif">
+<body class="h-screen selection:bg-zinc-200" style="font-family: Inter, sans-serif">
   <main id="app" class="h-full w-full flex">
     <div class="hidden lg:flex h-full w-1/2 bg-zinc-900 flex-col justify-between
-    text-zinc-50
-     p-8">
+    text-zinc-50 p-8">
       <h1 class="font-medium">App Title</h1>
     </div>
     <div class="h-full w-full lg:w-1/2 flex flex-col justify-center items-center
@@ -43,14 +42,15 @@ if ($auth_form = Session::get('auth_form')) {
       <form method="POST" action="../api/User.php" class="flex flex-col
        gap-2 w-2/3 sm:w-1/2">
         <input type="hidden" name="auth_type" id="auth_type" required
-          v-model="auth_type"/>
+          v-model="auth_type" :value="auth_type"/>
 
-        <label for="name" class="flex flex-col">
+        <label for="name">
           <input type="text" name="name" id="name" placeholder="Username"
             required minlength="3" maxlength="32" v-model="name"
             class="border-[1px] border-zinc-200 p-2 rounded-md text-sm w-full
-            outline-none outline-offset-0 focus-visible:outline-zinc-400
-            focus-visible:outline-[1px] placeholder:text-zinc-500"
+            outline-none outline-offset-0 focus-visible:outline-zinc-100
+            focus-visible:outline-4 hover:bg-zinc-100
+            placeholder:text-zinc-500"
           />
         </label>
 
@@ -58,15 +58,21 @@ if ($auth_form = Session::get('auth_form')) {
           <input type="password" name="password" id="password" placeholder="Password"
             required minlength="8" maxlength="32" v-model="password"
             class="border-[1px] border-zinc-200 p-2 rounded-md text-sm w-full
-            outline-none outline-offset-0 focus-visible:outline-zinc-400
-            focus-visible:outline-[1px] placeholder:text-zinc-500"
+            outline-none outline-offset-0 focus-visible:outline-zinc-100
+            focus-visible:outline-4 hover:bg-zinc-100
+            placeholder:text-zinc-500"
           />
         </label>
 
-        <input type="submit" value="Submit"
-          class="bg-zinc-900 text-zinc-50 p-2 rounded-md w-full mt-2 text-sm
-          cursor-pointer outline-none outline-offset-0 focus-visible:outline-zinc-400
-            focus-visible:outline-[1px]"/>
+        <input type="submit" :value="
+          auth_type === 'login'
+            ? 'Log in'
+            : 'Create account'
+         "
+          class="bg-zinc-900 text-zinc-50 p-2 rounded-md mt-2 text-sm
+          cursor-pointer outline-none outline-offset-0
+          focus-visible:outline-zinc-200 hover:outline-zinc-200 hover:outline-4
+            focus-visible:outline-4 active:bg-zinc-700"/>
       </form>
       <button @click="toggleAuthType"
         class="hover:underline text-sm text-zinc-500 outline-none
@@ -75,8 +81,9 @@ if ($auth_form = Session::get('auth_form')) {
           ? "Don't have an account?"
           : "Already have an account?" }}
       </button>
-
-      <p v-text="error"></p>
+      <p v-if="error !== ''" v-text="error"
+        class="absolute bottom-8 rounded-md p-4 text-center text-sm
+      bg-rose-200/50 text-rose-500/75"></p>
     </div>
   </main>
 

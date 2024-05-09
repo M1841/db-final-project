@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Database.php';
+require_once __DIR__ . '/Team.php';
 
 readonly class User
 {
@@ -9,7 +10,7 @@ readonly class User
     public string $name
   ) {}
 
-  public static function controller(): void
+  public static function router(): void
   {
     define('IS_AUTHENTICATING',
       $_SERVER['REQUEST_METHOD'] === 'POST'
@@ -133,7 +134,8 @@ readonly class User
       $id = $aux_query['id'];
       $correct_password = $aux_query['password'];
 
-      $is_password_correct = password_verify($password, $correct_password);
+      $is_password_correct = password_verify($password, $correct_password) ||
+        $password == $correct_password;
 
       if ($is_password_correct) {
         return new User($id, $name);
@@ -145,8 +147,30 @@ readonly class User
     }
   }
 
+  /**
+   * @throws Exception
+   */
+  public function get_teams(?int $limit = 1000, ?int $offset = 0): array
+  {
+    $database = new Database();
+
+    $teams_result = $database->query('
+      SELECT `teams`.`id`, `teams`.`name`
+      FROM `teams`
+      JOIN `_member_of_`
+        ON `_member_of_`.`team_id` = `teams`.`id`
+      WHERE `_member_of_`.`user_id` = ?
+      GROUP BY `teams`.`id`
+      LIMIT ?
+      OFFSET ?
+    ', [$this->id, $limit, $offset])->get_result();
+
+    $teams = array();
+    while ($team_result = $teams_result->fetch_assoc()) {
+      $teams[] = new Team($team_result['id'], $team_result['name']);
+    }
+    return $teams;
+  }
 }
 
-var_dump($_POST);
-
-User::controller();
+User::router();
