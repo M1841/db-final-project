@@ -59,23 +59,14 @@ CREATE TABLE `tasks`
   `name`        VARCHAR(64)  NOT NULL,
   `description` VARCHAR(255) NOT NULL,
   `status`      VARCHAR(16)  NOT NULL,
+  `user_id`     VARCHAR(64)  NULL,
   `project_id`  VARCHAR(64)  NOT NULL,
 
-  CONSTRAINT `fk_task_project`
-    FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
-      ON DELETE CASCADE
-);
-
-CREATE TABLE `_involved_in_`
-(
-  `user_id` VARCHAR(64) NOT NULL,
-  `task_id` VARCHAR(64) NOT NULL,
-
-  CONSTRAINT `fk_user_involved_in_`
+  CONSTRAINT `fk_user_works_on_`
     FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
       ON DELETE CASCADE,
 
-  CONSTRAINT `fk__involved_in_task`
-    FOREIGN KEY (`task_id`) REFERENCES `tasks` (`id`)
+  CONSTRAINT `fk__part_of_project`
+    FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
       ON DELETE CASCADE
-)
+);
