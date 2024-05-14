@@ -150,26 +150,12 @@ readonly class User
   /**
    * @throws Exception
    */
-  public static function get(string $id): User
-  {
-    $database = new Database();
-    $user_result = $database->query('
-      SELECT `id`, `name`
-      FROM `users`
-      WHERE `id` = ?
-    ', [$id])->get_result()->fetch_assoc();
-    return new User($user_result['id'], $user_result['name']);
-  }
-
-  /**
-   * @throws Exception
-   */
   public function get_teams(?int $limit = 1000, ?int $offset = 0): array
   {
     $database = new Database();
 
     $teams_result = $database->query('
-      SELECT `teams`.`id`, `teams`.`name`, `teams`.`description`
+      SELECT `teams`.`id`
       FROM `teams`
       JOIN `_member_of_`
         ON `_member_of_`.`team_id` = `teams`.`id`
@@ -181,26 +167,23 @@ readonly class User
 
     $teams = array();
     while ($team_result = $teams_result->fetch_assoc()) {
-      $id = $team_result['id'];
-      $name = $team_result['name'];
-      $description = $team_result['description'];
-      $members = array();
-
-      $members_result = $database->query('
-        SELECT `users`.`id`, `users`.`name`
-        FROM `users`
-        JOIN `_member_of_`
-          ON `_member_of_`.`user_id` = `users`.`id`
-        WHERE `_member_of_`.`team_id` = ?
-      ', [$id])->get_result();
-
-      while ($member_result = $members_result->fetch_assoc()) {
-        $members[] = new User($member_result['id'], $member_result['name']);
-      }
-
-      $teams[] = new Team($id, $name, $members, $description);
+      $teams[] = Team::get($team_result['id']);
     }
     return $teams;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public static function get(string $id): User
+  {
+    $database = new Database();
+    $user_result = $database->query('
+      SELECT `id`, `name`
+      FROM `users`
+      WHERE `id` = ?
+    ', [$id])->get_result()->fetch_assoc();
+    return new User($user_result['id'], $user_result['name']);
   }
 }
 
