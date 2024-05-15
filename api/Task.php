@@ -15,7 +15,8 @@ readonly class Task
   /**
    * @throws Exception
    */
-  public static function create(
+  public static function add(
+    string  $name,
     string  $description,
     Project $project,
     ?string $status = "",
@@ -30,8 +31,8 @@ readonly class Task
     $is_insert_successful = $database->query('
       INSERT INTO `tasks`
       VALUES (?, ?, ?, ?, ?, ?, ?)
-    ', [$id, $description, $project->id, $status, $priority, $user->id])
-      ->affected_rows;
+    ', [$id, $name, $description, $project->id, $status, $priority, $user->id])
+        ->affected_rows == 1;
 
     if ($is_insert_successful) {
       return Task::get($id);
@@ -64,4 +65,41 @@ readonly class Task
     );
   }
 
+  /**
+   * @throws Exception
+   */
+  public function update(): bool
+  {
+    $database = new Database();
+
+    return $database->query('
+      UPDATE `tasks`
+      SET `name` = ?,
+          `description` = ?,
+          `status` = ?,
+          `priority` = ?,
+          `user_id` = ?
+        WHERE `id` = ?
+    ', [
+        $this->name,
+        $this->description,
+        $this->status,
+        $this->priority,
+        $this->user->id
+      ])->affected_rows == 1;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function remove(): bool
+  {
+    $database = new Database();
+
+    return $database->query('
+      DELETE 
+      FROM `tasks`
+      WHERE `id` = ?
+    ', [$this->id])->affected_rows == 1;
+  }
 }

@@ -15,6 +15,30 @@ readonly class Team
   /**
    * @throws Exception
    */
+  public static function add(
+    string  $name,
+    ?string $description = ""
+  ): Team|null
+  {
+    $database = new Database();
+
+    $id = $database->generate_id();
+
+    $is_insert_successful = $database->query('
+      INSERT INTO `teams`
+      VALUES (?, ?, ?)
+    ', [$id, $name, $description])->affected_rows == 1;
+
+    if ($is_insert_successful) {
+      return Team::get($id);
+    } else {
+      return NULL;
+    }
+  }
+
+  /**
+   * @throws Exception
+   */
   public static function get(string $id): Team
   {
     $database = new Database();
@@ -26,20 +50,17 @@ readonly class Team
     ', [$id])->get_result()->fetch_assoc();
 
     $members_result = $database->query('
-      SELECT `users`.`id`, `users`.`name`
+      SELECT `users`.`id`
       FROM `teams`
       JOIN `_member_of_`
         ON `_member_of_`.`team_id` = ?
       JOIN `users`
         ON `_member_of_`.`user_id` = `users`.`id`
-    ', [$id])->get_result()->fetch_assoc();
+    ', [$id])->get_result();
 
     $members = array();
-    foreach ($members_result as $member) {
-      $members[] = new User(
-        $member['id'],
-        $member['name']
-      );
+    while ($member = $members_result->fetch_assoc()) {
+      $members[] = User::get($member['id']);
     }
 
     return new Team(

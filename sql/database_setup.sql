@@ -46,7 +46,12 @@ CREATE TABLE `projects`
   `id`          VARCHAR(64)  NOT NULL PRIMARY KEY,
   `name`        VARCHAR(64)  NOT NULL,
   `description` VARCHAR(255) NOT NULL,
+  `lead_id`     VARCHAR(64)  NOT NULL,
   `team_id`     VARCHAR(64)  NOT NULL,
+
+  CONSTRAINT `fk_project_lead`
+    FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`)
+      ON DELETE CASCADE,
 
   CONSTRAINT `fk_project_team`
     FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`)
