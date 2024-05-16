@@ -7,7 +7,11 @@ readonly class User
 {
   public function __construct(
     public string $id,
-    public string $name
+    public string $name,
+    public string $password,
+    public array  $teams,
+    public array  $projects,
+    public array  $tasks
   ) {}
 
   public static function router(): void
@@ -79,41 +83,19 @@ readonly class User
    */
   private static function register(string $name, string $password): User
   {
-    $database = new Database();
+    $is_name_taken = User::get($name) !== null;
 
-    if (!User::is_registered($name)) {
-      $password = password_hash($password, PASSWORD_ARGON2ID);
+    if ($is_name_taken) {
+      throw new Exception('User name is taken');
+    } else {
+      $user = User::add($name, $password);
 
-      $id = $database->generate_id();
-
-      $is_insert_successful = $database->query('
-        INSERT INTO `users` 
-          (`id`, `name`, `password`)
-        VALUES (?, ?, ?)
-      ', [$id, $name, $password])->affected_rows > 0;
-
-      if ($is_insert_successful) {
-        return new User($id, $name);
+      if ($user !== null) {
+        return $user;
       } else {
         throw new Exception('A database error has occurred. Try again later.');
       }
-    } else {
-      throw new Exception('User name is taken');
     }
-  }
-
-  /**
-   * @throws Exception
-   */
-  public static function is_registered(string $identifier): bool
-  {
-    $database = new Database();
-    return $database->query('
-      SELECT COUNT(`id`) AS `count`
-      FROM `users`
-      WHERE `name` = ?
-        OR `id` = ?
-    ', [$identifier, $identifier])->get_result()->fetch_assoc()['count'] > 0;
   }
 
   /**
@@ -121,24 +103,15 @@ readonly class User
    */
   private static function login(string $name, string $password): User
   {
-    $database = new Database();
+    $user = User::get($name);
+    $is_registered = $user !== null;
 
-    if (User::is_registered($name)) {
-
-      $aux_query = $database->query('
-        SELECT `id`, `password`
-        FROM `users`
-        WHERE `name` = ?
-      ', [$name])->get_result()->fetch_assoc();
-
-      $id = $aux_query['id'];
-      $correct_password = $aux_query['password'];
-
-      $is_password_correct = password_verify($password, $correct_password) ||
-        $password == $correct_password;
+    if ($is_registered) {
+      $is_password_correct = password_verify($password, $user->password)
+        || $password == $user->password;
 
       if ($is_password_correct) {
-        return new User($id, $name);
+        return $user;
       } else {
         throw new Exception('Incorrect password');
       }
@@ -150,40 +123,147 @@ readonly class User
   /**
    * @throws Exception
    */
-  public function get_teams(?int $limit = 1000, ?int $offset = 0): array
+  public static function add(string $name, string $password): User|null
   {
     $database = new Database();
+    $id = $database->generate_id();
+    $password = password_hash($password, PASSWORD_BCRYPT);
 
-    $teams_result = $database->query('
-      SELECT `teams`.`id`
-      FROM `teams`
-      JOIN `_member_of_`
-        ON `_member_of_`.`team_id` = `teams`.`id`
-      WHERE `_member_of_`.`user_id` = ?
-      GROUP BY `teams`.`id`
-      LIMIT ?
-      OFFSET ?
-    ', [$this->id, $limit, $offset])->get_result();
+    $is_insert_successful = $database->query('
+      INSERT INTO `users`
+      VALUES (?, ?, ?)
+    ', [$id, $name, $password])->affected_rows == 1;
 
-    $teams = array();
-    while ($team_result = $teams_result->fetch_assoc()) {
-      $teams[] = Team::get($team_result['id']);
-    }
-    return $teams;
+    return $is_insert_successful ? User::get($id) : null;
   }
 
   /**
    * @throws Exception
    */
-  public static function get(string $id): User
+  public static function get(string $identifier): User|null
   {
     $database = new Database();
     $user_result = $database->query('
       SELECT `id`, `name`
       FROM `users`
       WHERE `id` = ?
-    ', [$id])->get_result()->fetch_assoc();
-    return new User($user_result['id'], $user_result['name']);
+        OR `name` = ?
+    ', [$identifier, $identifier])->get_result();
+
+    $teams = User::get_teams($user_result['id']);
+    $projects = User::get_projects($user_result['id']);
+    $tasks = User::get_tasks($user_result['id']);
+
+    return $user_result->num_rows == 1 ? new User(
+      $user_result['id'],
+      $user_result['name'],
+      $user_result['password'],
+      $teams,
+      $projects,
+      $tasks
+    ) : null;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public static function get_teams(string $user_id): array
+  {
+    $database = new Database();
+    $teams_result = $database->query('
+      SELECT `teams`.`id`
+      FROM `_member_of_`
+      JOIN `teams`
+        ON `_member_of_`.`team_id` = `teams`.`id`
+      WHERE `_member_of_`.`user_id` = ?
+    ', [$user_id])->get_result();
+
+    $teams = array();
+    while ($team_result = $teams_result->fetch_assoc()) {
+      $teams[] = Team::get($teams_result['id']);
+    }
+
+    return $teams;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public static function get_projects(string $user_id): array
+  {
+    $database = new Database();
+    $projects_result = $database->query('
+      SELECT `id`
+      FROM `projects`
+      WHERE `lead_id` = ?
+    ', [$user_id])->get_result();
+
+    $projects = array();
+    while ($project_result = $projects_result->fetch_assoc()) {
+      $projects[] = Project::get($project_result['id']);
+    }
+
+    foreach (User::get_tasks($user_id) as $task) {
+      $projects[] = $task->project;
+    }
+
+    return $projects;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public static function get_tasks(string $user_id): array
+  {
+    $database = new Database();
+    $tasks_result = $database->query('
+      SELECT `id`
+      FROM `tasks`
+      WHERE `user_id` = ?
+    ', [$user_id])->get_result();
+
+    $tasks = array();
+    while ($task_result = $tasks_result->fetch_assoc()) {
+      $tasks[] = Task::get($task_result['id']);
+    }
+
+    return $tasks;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function update(?string $name, ?string $password): User
+  {
+    $database = new Database();
+
+    if ($name !== null) {
+      $user_with_name = User::get($name);
+      $is_name_taken = $user_with_name !== null && $user_with_name->id != $this->id;
+
+      if ($is_name_taken) {
+        throw new Exception('User name is taken');
+      }
+    }
+    $is_update_successful = $database->query('
+        UPDATE `users`
+          SET `name` = ?,
+            `password` = ?
+        WHERE `id` = ?
+      ', [
+        $name ?? $this->name,
+        $password ?? $this->password,
+        $this->id
+      ])->affected_rows == 1;
+
+    return $is_update_successful ? new User(
+      $this->id,
+      $name ?? $this->name,
+      $password ? password_hash($password, PASSWORD_BCRYPT) : $this->password,
+      $this->teams,
+      $this->projects,
+      $this->tasks
+    ) : $this;
   }
 }
 

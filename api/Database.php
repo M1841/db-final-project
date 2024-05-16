@@ -15,6 +15,11 @@ readonly class Database
     $this->connection = new mysqli($host, $user, $password, $schema, $port);
   }
 
+  private function __destruct()
+  {
+    $this->connection->close();
+  }
+
   /**
    * @throws Exception
    */
