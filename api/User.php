@@ -70,11 +70,6 @@ readonly class User
         exit();
         break;
       }
-      default:
-      {
-//        header('Location: ../');
-//        exit();
-      }
     }
   }
 
@@ -144,24 +139,26 @@ readonly class User
   {
     $database = new Database();
     $user_result = $database->query('
-      SELECT `id`, `name`
+      SELECT `id`, `name`, `password`
       FROM `users`
       WHERE `id` = ?
         OR `name` = ?
     ', [$identifier, $identifier])->get_result();
 
-    $teams = User::get_teams($user_result['id']);
-    $projects = User::get_projects($user_result['id']);
-    $tasks = User::get_tasks($user_result['id']);
+    if ($user_result->num_rows == 1) {
+      $user = $user_result->fetch_assoc();
 
-    return $user_result->num_rows == 1 ? new User(
-      $user_result['id'],
-      $user_result['name'],
-      $user_result['password'],
-      $teams,
-      $projects,
-      $tasks
-    ) : null;
+      return new User(
+        $user['id'],
+        $user['name'],
+        $user['password'],
+        User::get_teams($user['id']),
+        User::get_projects($user['id']),
+        User::get_tasks($user['id'])
+      );
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -180,7 +177,7 @@ readonly class User
 
     $teams = array();
     while ($team_result = $teams_result->fetch_assoc()) {
-      $teams[] = Team::get($teams_result['id']);
+      $teams[] = Team::get($team_result['id']);
     }
 
     return $teams;

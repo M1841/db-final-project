@@ -16,7 +16,7 @@ CREATE TABLE `users`
   `id`       VARCHAR(64)  NOT NULL PRIMARY KEY,
   `name`     VARCHAR(64)  NOT NULL,
   `password` VARCHAR(255) NOT NULL,
-  
+
   CONSTRAINT `unique_name`
     UNIQUE (`name`)
 );

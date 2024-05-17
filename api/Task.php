@@ -59,15 +59,21 @@ readonly class Task
       WHERE `id` = ?
     ', [$id])->get_result();
 
-    return $task_result->num_rows == 1 ? new Task(
-      $id,
-      $task_result['name'],
-      $task_result['description'],
-      Project::get($task_result['project_id']),
-      TaskStatus::tryFrom($task_result['status']),
-      TaskPriority::tryFrom($task_result['priority']),
-      User::get($task_result['user_id'])
-    ) : null;
+    if ($task_result->num_rows == 1) {
+      $task = $task_result->fetch_assoc();
+
+      return new Task(
+        $id,
+        $task['name'],
+        $task['description'],
+        Project::get($task['project_id']),
+        TaskStatus::tryFrom($task['status']),
+        TaskPriority::tryFrom($task['priority']),
+        User::get($task['user_id'])
+      );
+    } else {
+      return null;
+    }
   }
 
   /**

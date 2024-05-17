@@ -47,14 +47,20 @@ readonly class Project
       WHERE `id` = ?
     ', [$id])->get_result();
 
-    return $project_result->num_rows == 1 ? new Project(
-      $id,
-      $project_result['name'],
-      $project_result['description'],
-      User::get($project_result['lead_id']),
-      Team::get($project_result['team_id']),
-      Project::get_tasks($id)
-    ) : null;
+    if ($project_result->num_rows == 1) {
+      $project = $project_result->fetch_assoc();
+
+      return new Project(
+        $id,
+        $project['name'],
+        $project['description'],
+        User::get($project['lead_id']),
+        Team::get($project['team_id']),
+        Project::get_tasks($id)
+      );
+    } else {
+      return null;
+    }
   }
 
   /**

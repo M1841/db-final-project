@@ -44,13 +44,19 @@ readonly class Team
       WHERE `id` = ?
     ', [$id])->get_result();
 
-    return $team_result->num_rows == 1 ? new Team(
-      $id,
-      $team_result['name'],
-      $team_result['description'],
-      Team::get_members($id),
-      Team::get_projects($id)
-    ) : null;
+    if ($team_result->num_rows == 1) {
+      $team = $team_result->fetch_assoc();
+
+      return new Team(
+        $id,
+        $team['name'],
+        $team['description'],
+        Team::get_members($id),
+        Team::get_projects($id)
+      );
+    } else {
+      return null;
+    }
   }
 
   /**
