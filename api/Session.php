@@ -1,6 +1,6 @@
 <?php
 
-readonly class Session
+abstract class Session
 {
   public static function init(): void
   {

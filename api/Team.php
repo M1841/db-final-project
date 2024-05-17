@@ -1,16 +1,83 @@
 <?php
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Session.php';
 
 readonly class Team
 {
   public function __construct(
     public string $id,
     public string $name,
-    public string $description,
-    public array  $members,
-    public array  $projects
+    public string $description
   ) {}
 
-  public static function router(): void {}
+  public static function router(): void
+  {
+    define('IS_CREATING',
+      $_SERVER['REQUEST_METHOD'] === 'POST'
+      && Session::get('user') !== null
+      && isset($_POST['name'])
+      && isset($_POST['action'])
+      && $_POST['action'] === 'create'
+    );
+
+    define('IS_JOINING',
+      $_SERVER['REQUEST_METHOD'] === 'POST'
+      && Session::get('user') !== null
+      && isset($_POST['code'])
+      && isset($_POST['action'])
+      && $_POST['action'] === 'join'
+    );
+
+    switch (true) {
+      case IS_CREATING:
+      {
+        $name = $_POST['name'];
+        $description = $_POST['description'];
+        $user = Session::get('user');
+
+        try {
+          $team = Team::add($name, $description);
+          if (!$user->join($team)) {
+            $team->remove();
+            throw new Exception('An unexpected error occurred, try again later');
+          }
+          Session::unset('error');
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../teams');
+        exit();
+
+        break;
+      }
+
+      case IS_JOINING:
+      {
+        $id = $_POST['code'];
+        $user = Session::get('user');
+
+        try {
+          $team = Team::get($id);
+          if ($team !== null) {
+            if (!$user->join($team)) {
+              throw new Exception('An unexpected error occurred, try again later');
+            }
+            Session::unset('error');
+          } else {
+            throw new Exception('Could not find a team matching that code');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../teams');
+        exit();
+
+        break;
+      }
+    }
+  }
 
   /**
    * @throws Exception
@@ -20,14 +87,12 @@ readonly class Team
     string $description
   ): Team|null
   {
-    $database = new Database();
+    $id = Database::generate_id();
 
-    $id = $database->generate_id();
-
-    $is_insert_successful = $database->query('
+    $is_insert_successful = Database::query('
       INSERT INTO `teams`
       VALUES (?, ?, ?)
-    ', [$id, $name, $description])->affected_rows == 1;
+    ', [$id, $name, $description])["affected_rows"] == 1;
 
     return $is_insert_successful ? Team::get($id) : null;
   }
@@ -37,12 +102,11 @@ readonly class Team
    */
   public static function get(string $id): Team|null
   {
-    $database = new Database();
-    $team_result = $database->query('
+    $team_result = Database::query('
       SELECT `name`, `description`
       FROM `teams`
       WHERE `id` = ?
-    ', [$id])->get_result();
+    ', [$id])["result"];
 
     if ($team_result->num_rows == 1) {
       $team = $team_result->fetch_assoc();
@@ -50,9 +114,7 @@ readonly class Team
       return new Team(
         $id,
         $team['name'],
-        $team['description'],
-        Team::get_members($id),
-        Team::get_projects($id)
+        $team['description']
       );
     } else {
       return null;
@@ -62,16 +124,16 @@ readonly class Team
   /**
    * @throws Exception
    */
-  public static function get_members(string $team_id): array
+  public function get_members(): array
   {
-    $database = new Database();
-    $members_result = $database->query('
+    $members_result = Database::query('
       SELECT `users`.`id`
       FROM `_member_of_`
       JOIN `users`
         ON `_member_of_`.`user_id` = `users`.`id`
       WHERE `_member_of_`.`team_id` = ?
-    ', [$team_id])->get_result();
+    ', [$this->id])["result"];
+
 
     $members = array();
     while ($member_result = $members_result->fetch_assoc()) {
@@ -84,14 +146,13 @@ readonly class Team
   /**
    * @throws Exception
    */
-  public static function get_projects(string $team_id): array
+  public function get_projects(): array
   {
-    $database = new Database();
-    $projects_result = $database->query('
+    $projects_result = Database::query('
       SELECT `id`
       FROM `projects`
       WHERE `team_id` = ?
-    ', [$team_id])->get_result();
+    ', [$this->id])["result"];
 
     $projects = array();
     while ($project_result = $projects_result->fetch_assoc()) {
@@ -109,24 +170,21 @@ readonly class Team
     ?string $description
   ): Team
   {
-    $database = new Database();
-    $is_update_successful = $database->query('
+    $is_update_successful = Database::query('
       UPDATE `teams`
         SET `name` = ?,
             `description` = ?
       WHERE `id` = ?
     ', [
-        $name ?? $this->name,
-        $description ?? $this->description,
-        $this->id
-      ])->affected_rows == 1;
+      $name ?? $this->name,
+      $description ?? $this->description,
+      $this->id
+    ])["affected_rows"];
 
     return $is_update_successful ? new Team(
       $this->id,
       $name ?? $this->name,
-      $description ?? $this->description,
-      $this->members,
-      $this->projects
+      $description ?? $this->description
     ) : $this;
   }
 
@@ -135,12 +193,11 @@ readonly class Team
    */
   public function remove(): bool
   {
-    $database = new Database();
-    return $database->query('
+    return Database::query('
       DELETE
       FROM `teams`
       WHERE `id` = ?
-    ', [$this->id])->affected_rows == 1;
+    ', [$this->id])["affected_rows"] == 1;
   }
 }
 

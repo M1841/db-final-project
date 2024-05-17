@@ -8,7 +8,6 @@ readonly class Project
     public string $description,
     public User   $lead,
     public Team   $team,
-    public array  $tasks
   ) {}
 
   public static function router(): void {}
@@ -23,14 +22,13 @@ readonly class Project
     Team   $team
   ): Project|null
   {
-    $database = new Database();
-    $id = $database->generate_id();
+    $id = Database::generate_id();
 
-    $is_insert_successful = $database->query('
+    $is_insert_successful = Database::query('
       INSERT INTO `projects`
       VALUES (?, ?, ?, ?, ?)
     ', [$id, $name, $description, $lead->id, $team->id]
-      )->affected_rows == 1;
+      )["affected_rows"] == 1;
 
     return $is_insert_successful ? Project::get($id) : null;
   }
@@ -40,12 +38,11 @@ readonly class Project
    */
   public static function get(string $id): Project|null
   {
-    $database = new Database();
-    $project_result = $database->query('
+    $project_result = Database::query('
       SELECT `name`, `description`, `lead_id`, `team_id`
       FROM `projects`
       WHERE `id` = ?
-    ', [$id])->get_result();
+    ', [$id])["result"];
 
     if ($project_result->num_rows == 1) {
       $project = $project_result->fetch_assoc();
@@ -55,8 +52,7 @@ readonly class Project
         $project['name'],
         $project['description'],
         User::get($project['lead_id']),
-        Team::get($project['team_id']),
-        Project::get_tasks($id)
+        Team::get($project['team_id'])
       );
     } else {
       return null;
@@ -66,14 +62,13 @@ readonly class Project
   /**
    * @throws Exception
    */
-  public static function get_tasks(string $project_id): array
+  public function get_tasks(): array
   {
-    $database = new Database();
-    $tasks_result = $database->query('
+    $tasks_result = Database::query('
       SELECT `id`
       FROM `tasks`
       WHERE `project_id` = ?
-    ', [$project_id])->get_result();
+    ', [$this->id])["result"];
 
     $tasks = array();
     while ($task_result = $tasks_result->fetch_assoc()) {
@@ -91,8 +86,7 @@ readonly class Project
     ?string $description
   ): Project
   {
-    $database = new Database();
-    $is_update_successful = $database->query('
+    $is_update_successful = Database::query('
       UPDATE `projects`
         SET `name` = ?,
             `description` = ?
@@ -101,15 +95,14 @@ readonly class Project
         $name ?? $this->name,
         $description ?? $this->description,
         $this->id
-      ])->affected_rows == 1;
+      ])["affected_rows"] == 1;
 
     return $is_update_successful ? new Project(
       $this->id,
       $name ?? $this->name,
       $description ?? $this->description,
       $this->lead,
-      $this->team,
-      $this->tasks
+      $this->team
     ) : $this;
   }
 
@@ -118,12 +111,11 @@ readonly class Project
    */
   public function remove(): bool
   {
-    $database = new Database();
-    return $database->query('
+    return Database::query('
       DELETE
       FROM `projects`
       WHERE `id` = ?
-    ', [$this->id])->affected_rows == 1;
+    ', [$this->id])["affected_rows"] == 1;
   }
 }
 

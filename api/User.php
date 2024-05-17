@@ -5,13 +5,11 @@ require_once __DIR__ . '/Team.php';
 
 readonly class User
 {
+
   public function __construct(
     public string $id,
     public string $name,
-    public string $password,
-    public array  $teams,
-    public array  $projects,
-    public array  $tasks
+    public string $password
   ) {}
 
   public static function router(): void
@@ -120,14 +118,13 @@ readonly class User
    */
   public static function add(string $name, string $password): User|null
   {
-    $database = new Database();
-    $id = $database->generate_id();
+    $id = Database::generate_id();
     $password = password_hash($password, PASSWORD_BCRYPT);
 
-    $is_insert_successful = $database->query('
+    $is_insert_successful = Database::query('
       INSERT INTO `users`
       VALUES (?, ?, ?)
-    ', [$id, $name, $password])->affected_rows == 1;
+    ', [$id, $name, $password])["affected_rows"] == 1;
 
     return $is_insert_successful ? User::get($id) : null;
   }
@@ -137,13 +134,12 @@ readonly class User
    */
   public static function get(string $identifier): User|null
   {
-    $database = new Database();
-    $user_result = $database->query('
+    $user_result = Database::query('
       SELECT `id`, `name`, `password`
       FROM `users`
       WHERE `id` = ?
         OR `name` = ?
-    ', [$identifier, $identifier])->get_result();
+    ', [$identifier, $identifier])["result"];
 
     if ($user_result->num_rows == 1) {
       $user = $user_result->fetch_assoc();
@@ -151,10 +147,7 @@ readonly class User
       return new User(
         $user['id'],
         $user['name'],
-        $user['password'],
-        User::get_teams($user['id']),
-        User::get_projects($user['id']),
-        User::get_tasks($user['id'])
+        $user['password']
       );
     } else {
       return null;
@@ -164,16 +157,15 @@ readonly class User
   /**
    * @throws Exception
    */
-  public static function get_teams(string $user_id): array
+  public function get_teams(): array
   {
-    $database = new Database();
-    $teams_result = $database->query('
+    $teams_result = Database::query('
       SELECT `teams`.`id`
       FROM `_member_of_`
       JOIN `teams`
         ON `_member_of_`.`team_id` = `teams`.`id`
       WHERE `_member_of_`.`user_id` = ?
-    ', [$user_id])->get_result();
+    ', [$this->id])["result"];
 
     $teams = array();
     while ($team_result = $teams_result->fetch_assoc()) {
@@ -186,21 +178,20 @@ readonly class User
   /**
    * @throws Exception
    */
-  public static function get_projects(string $user_id): array
+  public function get_projects(): array
   {
-    $database = new Database();
-    $projects_result = $database->query('
+    $projects_result = Database::query('
       SELECT `id`
       FROM `projects`
       WHERE `lead_id` = ?
-    ', [$user_id])->get_result();
+    ', [$this->id])["result"];
 
     $projects = array();
     while ($project_result = $projects_result->fetch_assoc()) {
       $projects[] = Project::get($project_result['id']);
     }
 
-    foreach (User::get_tasks($user_id) as $task) {
+    foreach ($this->get_tasks() as $task) {
       $projects[] = $task->project;
     }
 
@@ -210,14 +201,13 @@ readonly class User
   /**
    * @throws Exception
    */
-  public static function get_tasks(string $user_id): array
+  public function get_tasks(): array
   {
-    $database = new Database();
-    $tasks_result = $database->query('
+    $tasks_result = Database::query('
       SELECT `id`
       FROM `tasks`
       WHERE `user_id` = ?
-    ', [$user_id])->get_result();
+    ', [$this->id])["result"];
 
     $tasks = array();
     while ($task_result = $tasks_result->fetch_assoc()) {
@@ -232,8 +222,6 @@ readonly class User
    */
   public function update(?string $name, ?string $password): User
   {
-    $database = new Database();
-
     if ($name !== null) {
       $user_with_name = User::get($name);
       $is_name_taken = $user_with_name !== null && $user_with_name->id != $this->id;
@@ -242,7 +230,7 @@ readonly class User
         throw new Exception('User name is taken');
       }
     }
-    $is_update_successful = $database->query('
+    $is_update_successful = Database::query('
         UPDATE `users`
           SET `name` = ?,
             `password` = ?
@@ -251,16 +239,24 @@ readonly class User
         $name ?? $this->name,
         $password ?? $this->password,
         $this->id
-      ])->affected_rows == 1;
+      ])["affected_rows"] == 1;
 
     return $is_update_successful ? new User(
       $this->id,
       $name ?? $this->name,
-      $password ? password_hash($password, PASSWORD_BCRYPT) : $this->password,
-      $this->teams,
-      $this->projects,
-      $this->tasks
+      $password ? password_hash($password, PASSWORD_BCRYPT) : $this->password
     ) : $this;
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function join(Team $team): bool
+  {
+    return Database::query('
+      INSERT INTO `_member_of_`
+      VALUES (?, ?)
+    ', [$this->id, $team->id])['affected_rows'] === 1;
   }
 }
 

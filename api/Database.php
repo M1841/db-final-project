@@ -1,42 +1,24 @@
 <?php
 
-readonly class Database
+abstract class Database
 {
-  private mysqli $connection;
-
-  public function __construct(
-    ?string $host = 'localhost',
-    ?string $user = 'root',
-    ?string $password = '',
-    ?string $schema = 'db_final_project',
-    ?string $port = '3306'
-  )
+  /**
+   * @throws Exception
+   */
+  public static function generate_id(): string
   {
-    $this->connection = new mysqli($host, $user, $password, $schema, $port);
-  }
-
-  public function __destruct()
-  {
-    $this->connection->close();
+    return Database::query('SELECT UUID() AS `id`')["result"]->fetch_assoc()['id'];
   }
 
   /**
    * @throws Exception
    */
-  public function generate_id(): string
+  public static function query(string $query_string, ?array $params = NULL):
+  array
   {
-    return $this
-      ->query('SELECT UUID() AS `id`')
-      ->get_result()
-      ->fetch_assoc()['id'];
-  }
+    $connection = new mysqli('localhost', 'root', '', 'db_final_project', '3306');
 
-  /**
-   * @throws Exception
-   */
-  public function query(string $query_string, ?array $params = NULL): mysqli_stmt
-  {
-    $query = $this->connection->prepare($query_string);
+    $query = $connection->prepare($query_string);
 
     if ($query === false) {
       throw new Exception("Couldn't prepare query for execution");
@@ -49,6 +31,13 @@ readonly class Database
     }
     $query->execute();
 
-    return $query;
+    $output = [
+      'result' => $query->get_result(),
+      'affected_rows' => $query->affected_rows
+    ];
+
+    $connection->close();
+
+    return $output;
   }
 }

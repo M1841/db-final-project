@@ -85,47 +85,22 @@ sans-serif">
       <h2 class="font-semibold">
         Teams
       </h2>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-8">
-        <?php
-        foreach ($user->get_teams() as $team) {
-          echo '
-          <div class="bg-zinc-50 border-[1px] border-zinc-200 rounded-md p-4 drop-shadow-sm flex flex-col">
-              <div class="flex justify-between items-center">
-                <h3 class="text-sm flex items-center gap-1">
-                  <span class="material-symbols-outlined text-xl">
-                    group
-                  </span>
-                  ' . $team->name . '
-                </h3>
-                <p class="text-xs text-zinc-500">
-                  ' . count($team->members) . (count($team->members) > 1
-              ? ' Members'
-              : ' Member') . '
-                </p>
-              </div>
-              <div class="flex flex-col">';
+    </div>
+  </main>
 
-          foreach ($team->members as $member) {
-            echo '
-              <div class="flex">
-                <span class="bg-zinc-300 text-zinc-500 rounded-full aspect-square
-                  font-medium text-xs flex justify-center items-center">
-                  <span class="h-6 w-6 flex justify-center items-center">
-                    ' . mb_strtoupper($member->name[0]) . '
-                  </span>
-                </span>
-                ' . mb_strtoupper($member->name) . '
-              </div>
-            ';
-          }
+  <main class="p-4 lg:py-8 lg:px-16">
+    <div class="flex flex-col gap-2">
+      <h2 class="font-semibold">
+        Projects
+      </h2>
+    </div>
+  </main>
 
-          echo '
-              </div>
-          </div>  
-        ';
-        }
-        ?>
-      </div>
+  <main class="p-4 lg:py-8 lg:px-16">
+    <div class="flex flex-col gap-2">
+      <h2 class="font-semibold">
+        Tasks
+      </h2>
     </div>
   </main>
 </body>

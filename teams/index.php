@@ -18,7 +18,41 @@ if ($user === null) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Teams</title>
+
 </head>
 <body>
-  <h1>Your Teams</h1>
+  <p>Join a Team</p>
+  <form method="POST" action="../api/Team.php">
+    <input type="hidden" name="action" value="join"/>
+    <input type="text" name="code" placeholder="Code"
+      minlength="36" maxlength="36" required/>
+    <input type="submit" value="Join"/>
+  </form>
+
+  <p>Create a Team</p>
+  <form method="POST" action="../api/Team.php">
+    <input type="hidden" name="action" value="create"/>
+    <input type="text" name="name" placeholder="Name" required/>
+    <textarea name="description" placeholder="Description"></textarea>
+    <input type="submit" value="Create"/>
+  </form>
+
+  <p>Your Teams</p>
+  <ul>
+    <?php
+    foreach ($user->get_teams() as $team) {
+      echo('
+        <li>
+          <p>' . $team->name . '</p>
+          <p>' . $team->description . '</p>
+        </li>
+      ');
+    }
+    ?>
+  </ul>
+  <?php
+  if ($error = Session::get('error')) {
+    echo($error);
+  }
+  ?>
 </body>

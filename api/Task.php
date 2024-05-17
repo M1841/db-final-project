@@ -26,11 +26,9 @@ readonly class Task
     ?User         $user = null
   ): Task|null
   {
-    $database = new Database();
+    $id = Database::generate_id();
 
-    $id = $database->generate_id();
-
-    $is_insert_successful = $database->query('
+    $is_insert_successful = Database::query('
       INSERT INTO `tasks`
       VALUES (?, ?, ?, ?, ?, ?, ?)
     ', [
@@ -41,7 +39,7 @@ readonly class Task
         $status->value,
         $priority->value,
         $user->id
-      ])->affected_rows == 1;
+      ])["affected_rows"] == 1;
 
     return $is_insert_successful ? Task::get($id) : null;
   }
@@ -51,13 +49,11 @@ readonly class Task
    */
   public static function get(string $id): Task|null
   {
-    $database = new Database();
-
-    $task_result = $database->query('
+    $task_result = Database::query('
       SELECT `name`, `description`, `status`, `priority`, `user_id`, `project_id`
       FROM `tasks`
       WHERE `id` = ?
-    ', [$id])->get_result();
+    ', [$id])["result"];
 
     if ($task_result->num_rows == 1) {
       $task = $task_result->fetch_assoc();
@@ -87,9 +83,7 @@ readonly class Task
     ?User         $user
   ): Task
   {
-    $database = new Database();
-
-    $is_update_successful = $database->query('
+    $is_update_successful = Database::query('
       UPDATE `tasks`
       SET `name` = ?,
           `description` = ?,
@@ -104,7 +98,7 @@ readonly class Task
         $priority ? $priority->value : $this->priority->value,
         $user ? $user->id : $this->user->id,
         $this->id
-      ])->affected_rows == 1;
+      ])["affected_rows"] == 1;
 
     return $is_update_successful ? new Task(
       $this->id,
@@ -122,13 +116,11 @@ readonly class Task
    */
   public function remove(): bool
   {
-    $database = new Database();
-
-    return $database->query('
+    return Database::query('
       DELETE 
       FROM `tasks`
       WHERE `id` = ?
-    ', [$this->id])->affected_rows == 1;
+    ', [$this->id])["affected_rows"] == 1;
   }
 }
 
