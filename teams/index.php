@@ -39,20 +39,14 @@ if ($user === null) {
 
   <p>Your Teams</p>
   <ul>
-    <?php
-    foreach ($user->get_teams() as $team) {
-      echo('
-        <li>
-          <p>' . $team->name . '</p>
-          <p>' . $team->description . '</p>
-        </li>
-      ');
-    }
-    ?>
+    <?php foreach ($user->get_teams() as $team) { ?>
+      <li>
+        <a href="../team?id=<?= $team->id ?>">
+          <p><?= $team->name ?></p>
+          <p><?= $team->description ?></p>
+        </a>
+      </li>
+    <?php } ?>
   </ul>
-  <?php
-  if ($error = Session::get('error')) {
-    echo($error);
-  }
-  ?>
+  <?php echo(Session::get('error')); ?>
 </body>

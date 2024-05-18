@@ -8,6 +8,5 @@ behind AppName');
 
 INSERT INTO `_member_of_`
 VALUES ('063c73d1-142e-11ef-9517-00155d197d4f',
-        '064b32c4-142e-11ef-9517-00155d197d4f')
+        '064b32c4-142e-11ef-9517-00155d197d4f');
 
-SELECT UUID();
