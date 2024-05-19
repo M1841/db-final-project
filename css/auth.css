@@ -168,6 +168,7 @@ main > button {
 
 main > button:hover, main > button:focus-visible {
   color: #18181b;
+  outline: 0 solid transparent;
 }
 
 main > p {

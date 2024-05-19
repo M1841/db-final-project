@@ -18,11 +18,11 @@ if ($user === null) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Teams</title>
-
 </head>
 <body>
   <p>Join a Team</p>
   <form method="POST" action="../api/Team.php">
+    <input type="hidden" name="resource" value="team"/>
     <input type="hidden" name="action" value="join"/>
     <input type="text" name="code" placeholder="Code"
       minlength="36" maxlength="36" required/>
@@ -31,6 +31,7 @@ if ($user === null) {
 
   <p>Create a Team</p>
   <form method="POST" action="../api/Team.php">
+    <input type="hidden" name="resource" value="team"/>
     <input type="hidden" name="action" value="create"/>
     <input type="text" name="name" placeholder="Name" required/>
     <textarea name="description" placeholder="Description"></textarea>
@@ -48,5 +49,8 @@ if ($user === null) {
       </li>
     <?php } ?>
   </ul>
-  <?php echo(Session::get('error')); ?>
+  <?php
+  echo(Session::get('error'));
+  Session::unset('error');
+  ?>
 </body>

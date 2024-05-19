@@ -14,24 +14,21 @@ readonly class User
 
   public static function router(): void
   {
-    define('IS_AUTHENTICATING',
-      $_SERVER['REQUEST_METHOD'] === 'POST'
+    $IS_AUTHENTICATING = $_SERVER['REQUEST_METHOD'] === 'POST'
       && isset($_POST['name'])
       && isset($_POST['password'])
       && isset($_POST['auth_type'])
       && (
         $_POST['auth_type'] === 'register'
         || $_POST['auth_type'] === 'login'
-      )
-    );
-    define('IS_LOGGING_OUT',
-      $_SERVER['REQUEST_METHOD'] === 'POST'
+      );
+
+    $IS_LOGGING_OUT = $_SERVER['REQUEST_METHOD'] === 'POST'
       && isset($_POST['auth_type'])
-      && $_POST['auth_type'] === 'logout'
-    );
+      && $_POST['auth_type'] === 'logout';
 
     switch (true) {
-      case IS_AUTHENTICATING:
+      case $IS_AUTHENTICATING:
       {
         $name = $_POST['name'];
         $password = $_POST['password'];
@@ -61,7 +58,7 @@ readonly class User
         }
         break;
       }
-      case IS_LOGGING_OUT:
+      case $IS_LOGGING_OUT:
       {
         Session::unset('user');
         header('Location: ../');
@@ -167,7 +164,7 @@ readonly class User
       WHERE `_member_of_`.`user_id` = ?
     ', [$this->id])["result"];
 
-    $teams = array();
+    $teams = [];
     while ($team_result = $teams_result->fetch_assoc()) {
       $teams[] = Team::get($team_result['id']);
     }
@@ -186,7 +183,7 @@ readonly class User
       WHERE `lead_id` = ?
     ', [$this->id])["result"];
 
-    $projects = array();
+    $projects = [];
     while ($project_result = $projects_result->fetch_assoc()) {
       $projects[] = Project::get($project_result['id']);
     }
@@ -209,7 +206,7 @@ readonly class User
       WHERE `user_id` = ?
     ', [$this->id])["result"];
 
-    $tasks = array();
+    $tasks = [];
     while ($task_result = $tasks_result->fetch_assoc()) {
       $tasks[] = Task::get($task_result['id']);
     }
@@ -253,10 +250,27 @@ readonly class User
    */
   public function join(Team $team): bool
   {
-    return Database::query('
+    if (!$this->is_in_team($team)) {
+      return Database::query('
       INSERT INTO `_member_of_`
       VALUES (?, ?)
     ', [$this->id, $team->id])['affected_rows'] === 1;
+    } else {
+      throw new Exception('You are already in that team');
+    }
+  }
+
+  /**
+   * @throws Exception
+   */
+  public function is_in_team(Team $team): bool
+  {
+    return Database::query('
+      SELECT COUNT(*) AS `count`
+      FROM `_member_of_`
+      WHERE `user_id` = ?
+        AND `team_id` = ?
+    ', [$this->id, $team->id])['result']->fetch_assoc()['count'] > 0;
   }
 }
 

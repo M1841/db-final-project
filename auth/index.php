@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../api/Session.php';
 
-$name = $password = $is_registering = NULL;
+$name = $password = $is_registering = null;
 
 if ($auth_form = Session::get('auth_form')) {
   $name = htmlspecialchars($auth_form['name']);
@@ -70,7 +70,10 @@ if ($auth_form = Session::get('auth_form')) {
 
     <?php if (Session::get('error') !== null) { ?>
       <p><?= Session::get('error') ?></p>
-    <?php } ?>
+      <?php
+      Session::unset('error');
+    }
+    ?>
   </main>
 
   <script>

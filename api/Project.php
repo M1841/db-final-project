@@ -1,4 +1,8 @@
 <?php
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Team.php';
+require_once __DIR__ . '/Request.php';
+require_once __DIR__ . '/Session.php';
 
 readonly class Project
 {
@@ -10,7 +14,116 @@ readonly class Project
     public Team   $team,
   ) {}
 
-  public static function router(): void {}
+  public static function router(): void
+  {
+    $IS_CREATING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('team_id')
+      && Request::post('name')
+      && Request::post('action') === 'create';
+
+    $IS_EDITING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('name')
+      && Request::post('description')
+      && Request::post('action') === 'edit'
+      && Request::post('resource') === 'project';
+
+    $IS_DELETING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('action') === 'delete'
+      && Request::post('resource') === 'project';
+
+    switch (true) {
+      case $IS_CREATING:
+      {
+        $team_id = Request::post('team_id');
+        $name = Request::post('name');
+        $description = Request::post('description');
+        $user = Session::get('user');
+
+        try {
+          $team = Team::get($team_id);
+          if ($team !== null) {
+            if ($user->is_in_team($team)) {
+              $project = Project::add($name, $description, $user, $team);
+              Session::unset('error');
+
+              header('Location: ../project?id=' . $project->id);
+              exit();
+            } else {
+              throw new Exception('You cannot add a project to a team you are not in');
+            }
+          } else {
+            throw new Exception('Could not find team');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../projects');
+        exit();
+        break;
+      }
+      case $IS_EDITING:
+      {
+        $id = Request::post('id');
+        $name = Request::post('name');
+        $description = Request::post('description');
+        $user = Session::get('user');
+
+        try {
+          $project = Project::get($id);
+          if ($project !== null) {
+            if ($user->id === $project->lead->id) {
+              $project->update($name, $description);
+              Session::unset('error');
+
+              header('Location: ../project?id=' . $project->id);
+              exit();
+            } else {
+              throw new Exception('You cannot edit a project if you are not its lead');
+            }
+          } else {
+            throw new Exception('Could not find project');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../projects');
+        exit();
+        break;
+      }
+      case $IS_DELETING:
+      {
+        $user = Session::get('user');
+        $id = Request::post('id');
+
+        try {
+          $project = Project::get($id);
+          if ($project !== null) {
+            if ($user->id === $project->lead->id) {
+              $project->remove();
+              Session::unset('error');
+            } else {
+              throw new Exception('You cannot delete a project if you are not its lead');
+            }
+          } else {
+            throw new Exception('Could not find project');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../projects');
+        exit();
+        break;
+      }
+    }
+  }
 
   /**
    * @throws Exception
@@ -70,7 +183,7 @@ readonly class Project
       WHERE `project_id` = ?
     ', [$this->id])["result"];
 
-    $tasks = array();
+    $tasks = [];
     while ($task_result = $tasks_result->fetch_assoc()) {
       $tasks[] = Task::get($task_result['id']);
     }

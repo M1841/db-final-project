@@ -1,5 +1,7 @@
 <?php
 require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Project.php';
+require_once __DIR__ . '/Request.php';
 require_once __DIR__ . '/Session.php';
 
 readonly class Team
@@ -12,27 +14,37 @@ readonly class Team
 
   public static function router(): void
   {
-    define('IS_CREATING',
-      $_SERVER['REQUEST_METHOD'] === 'POST'
+    $IS_CREATING = Request::method() === 'POST'
       && Session::get('user') !== null
-      && isset($_POST['name'])
-      && isset($_POST['action'])
-      && $_POST['action'] === 'create'
-    );
+      && Request::post('name')
+      && Request::post('action') === 'create'
+      && Request::post('resource') === 'team';
 
-    define('IS_JOINING',
-      $_SERVER['REQUEST_METHOD'] === 'POST'
+    $IS_JOINING = Request::method() === 'POST'
       && Session::get('user') !== null
-      && isset($_POST['code'])
-      && isset($_POST['action'])
-      && $_POST['action'] === 'join'
-    );
+      && Request::post('code')
+      && Request::post('action') === 'join'
+      && Request::post('resource') === 'team';
+
+    $IS_EDITING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('name')
+      && Request::post('description')
+      && Request::post('action') === 'edit'
+      && Request::post('resource') === 'team';
+
+    $IS_DELETING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('action') === 'delete'
+      && Request::post('resource') === 'team';
 
     switch (true) {
-      case IS_CREATING:
+      case $IS_CREATING:
       {
-        $name = $_POST['name'];
-        $description = $_POST['description'];
+        $name = Request::post('name');
+        $description = Request::post('description');
         $user = Session::get('user');
 
         try {
@@ -42,28 +54,33 @@ readonly class Team
             throw new Exception('An unexpected error occurred, try again later');
           }
           Session::unset('error');
+
+          header('Location: ../team?id=' . $team->id);
+          exit();
         } catch (Exception $err) {
           Session::set('error', $err->getMessage());
         }
 
         header('Location: ../teams');
         exit();
-
         break;
       }
-
-      case IS_JOINING:
+      case $IS_JOINING:
       {
-        $id = $_POST['code'];
+        $id = Request::post('code');
         $user = Session::get('user');
 
         try {
           $team = Team::get($id);
+
           if ($team !== null) {
             if (!$user->join($team)) {
               throw new Exception('An unexpected error occurred, try again later');
             }
             Session::unset('error');
+
+            header('Location: ../team?id=' . $id);
+            exit();
           } else {
             throw new Exception('Could not find a team matching that code');
           }
@@ -73,7 +90,61 @@ readonly class Team
 
         header('Location: ../teams');
         exit();
+        break;
+      }
+      case $IS_EDITING:
+      {
+        $user = Session::get('user');
+        $id = Request::post('id');
+        $name = Request::post('name');
+        $description = Request::post('description');
 
+        try {
+          $team = Team::get($id);
+          if ($team !== null) {
+            if ($user->is_in_team($team)) {
+              $team->update($name, $description);
+              Session::unset('error');
+
+              header('Location: ../team?id=' . $id);
+              exit();
+            } else {
+              throw new Exception('You cannot edit a team you are not it');
+            }
+          } else {
+            throw new Exception('Could not find team');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../teams');
+        exit();
+        break;
+      }
+      case $IS_DELETING:
+      {
+        $user = Session::get('user');
+        $id = Request::post('id');
+
+        try {
+          $team = Team::get($id);
+          if ($team !== null) {
+            if ($user->is_in_team($team)) {
+              $team->remove();
+              Session::unset('error');
+            } else {
+              throw new Exception('You cannot delete a team you are not it');
+            }
+          } else {
+            throw new Exception('Could not find team');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../teams');
+        exit();
         break;
       }
     }
@@ -135,7 +206,7 @@ readonly class Team
     ', [$this->id])["result"];
 
 
-    $members = array();
+    $members = [];
     while ($member_result = $members_result->fetch_assoc()) {
       $members[] = User::get($member_result['id']);
     }
@@ -154,7 +225,7 @@ readonly class Team
       WHERE `team_id` = ?
     ', [$this->id])["result"];
 
-    $projects = array();
+    $projects = [];
     while ($project_result = $projects_result->fetch_assoc()) {
       $projects[] = Project::get($project_result['id']);
     }

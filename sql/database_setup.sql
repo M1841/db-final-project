@@ -4,8 +4,7 @@ CREATE SCHEMA `db_final_project`;
 
 USE `db_final_project`;
 
-DROP TABLE IF EXISTS `_member_of`;
-DROP TABLE IF EXISTS `_involved_in`;
+DROP TABLE IF EXISTS `_member_of_`;
 DROP TABLE IF EXISTS `users`;
 DROP TABLE IF EXISTS `teams`;
 DROP TABLE IF EXISTS `projects`;

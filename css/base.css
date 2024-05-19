@@ -334,3 +334,7 @@ img, video {
 [type="password"] {
   font-family: ui-sans-serif;
 }
+
+[type="password"]::placeholder {
+  font-family: 'Inter', sans-serif;
+}
