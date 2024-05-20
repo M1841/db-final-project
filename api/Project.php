@@ -20,13 +20,13 @@ readonly class Project
       && Session::get('user') !== null
       && Request::post('team_id')
       && Request::post('name')
-      && Request::post('action') === 'create';
+      && Request::post('action') === 'create'
+      && Request::post('resource') === 'project';
 
     $IS_EDITING = Request::method() === 'POST'
       && Session::get('user') !== null
       && Request::post('id')
       && Request::post('name')
-      && Request::post('description')
       && Request::post('action') === 'edit'
       && Request::post('resource') === 'project';
 

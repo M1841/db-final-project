@@ -27,7 +27,7 @@ if ($auth_form = Session::get('auth_form')) {
 <body>
   <aside>
     <h1>
-      <i>inventory</i>
+      <i class="symbol">inventory</i>
       App Title
     </h1>
   </aside>
@@ -38,11 +38,11 @@ if ($auth_form = Session::get('auth_form')) {
       App Title
     </h1>
     <h2>
-      Welcome!
+      <?= $is_registering ? 'Welcome!' : 'Welcome Back!' ?>
     </h2>
     <form method="POST" action="../api/User.php">
       <input type="hidden" name="auth_type" id="auth_type" required
-        value="register"/>
+        value="<?= $is_registering ? 'register' : 'login' ?>"/>
 
       <label for="name">
         <input type="text" name="name" id="name" placeholder="Username"
@@ -62,10 +62,11 @@ if ($auth_form = Session::get('auth_form')) {
         </button>
       </div>
 
-      <input type="submit" value="Create account"/>
+      <input type="submit"
+        value="<?= $is_registering ? 'Create account' : 'Log in' ?>"/>
     </form>
     <button onclick="toggle_auth_type()" type="button" id="auth_type_toggle">
-      Already have an account?
+      <?= $is_registering ? 'Already have an account?' : 'Don\'t have an account?' ?>
     </button>
 
     <?php if (Session::get('error') !== null) { ?>

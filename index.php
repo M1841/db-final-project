@@ -4,7 +4,7 @@ require_once __DIR__ . '/api/Session.php';
 
 $user = Session::get('user');
 
-if ($user === NULL) {
+if ($user === null) {
   header('Location: ./auth');
   exit();
 }
@@ -70,5 +70,10 @@ if ($user === NULL) {
       <h2>Tasks</h2>
     </section>
   </main>
+  
+  <?php
+  echo(Session::get('error'));
+  Session::unset('error');
+  ?>
 </body>
 </html>

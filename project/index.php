@@ -25,7 +25,7 @@ try {
   if (!$user->is_in_team($team)) {
     throw new Exception('You cannot view a project from a team you are not in');
   }
-
+  $members = $project->team->get_members();
   $tasks = $project->get_tasks();
 } catch (Exception $err) {
   Session::set('error', $err->getMessage());
@@ -86,8 +86,39 @@ try {
     <input type="hidden" name="resource" value="task"/>
     <input type="hidden" name="action" value="create"/>
     <input type="hidden" name="project_id" value="<?= $project->id ?>"/>
+
     <input type="text" name="name" placeholder="Name" required/>
     <textarea name="description" placeholder="Description"></textarea>
+
+    <select name="priority" required>
+      <?php foreach (TaskPriority::cases() as $case) { ?>
+        <option value="<?= $case->value ?>">
+          <?= $case->value ?>
+        </option>
+      <?php } ?>
+    </select>
+
+    <select name="status" required>
+      <?php foreach (TaskStatus::cases() as $case) { ?>
+        <option value="<?= $case->value ?>">
+          <?= $case->value ?>
+        </option>
+      <?php } ?>
+    </select>
+
+    <select name="user_id" required>
+      <option value="null">Unassigned</option>
+      <?php foreach ($members as $member) { ?>
+        <option value="<?= $member->id ?>">
+          <?= $member->name ?>
+        </option>
+      <?php } ?>
+    </select>
     <input type="submit" value="Create"/>
   </form>
+
+  <?php
+  echo(Session::get('error'));
+  Session::unset('error');
+  ?>
 </body>

@@ -1,4 +1,9 @@
 <?php
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Team.php';
+require_once __DIR__ . '/Project.php';
+require_once __DIR__ . '/Request.php';
+require_once __DIR__ . '/Session.php';
 
 readonly class Task
 {
@@ -9,10 +14,168 @@ readonly class Task
     public Project      $project,
     public TaskStatus   $status,
     public TaskPriority $priority,
-    public User         $user
+    public ?User        $user = null
   ) {}
 
-  public static function router(): void {}
+  public static function router(): void
+  {
+    $IS_CREATING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('project_id')
+      && Request::post('name')
+      && Request::post('action') === 'create'
+      && Request::post('resource') === 'task'
+      && Request::post('user_id')
+      && Request::post('priority')
+      && Request::post('status');
+
+    $IS_EDITING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('name')
+      && Request::post('action') === 'edit'
+      && Request::post('resource') === 'task'
+      && Request::post('user_id')
+      && Request::post('priority')
+      && Request::post('status');
+
+    $IS_DELETING = Request::method() === 'POST'
+      && Session::get('user') !== null
+      && Request::post('id')
+      && Request::post('action') === 'delete'
+      && Request::post('resource') === 'task';
+
+    switch (true) {
+      case $IS_CREATING:
+      {
+        $project_id = Request::post('project_id');
+        $name = Request::post('name');
+        $description = Request::post('description');
+        $user = Session::get('user');
+        $user_id = Request::post('user_id');
+        $priority = TaskPriority::tryFrom(Request::post('priority')) ?? TaskPriority::Low;
+        $status = TaskStatus::tryFrom(Request::post('status')) ??
+          TaskStatus::NotStarted;
+
+        try {
+          $project = Project::get($project_id);
+          if ($project !== null) {
+            if ($user->id === $project->lead->id) {
+              if ($user_id !== 'null') {
+                $user = User::get($user_id);
+                if ($user !== null && $user->is_in_team($project->team)) {
+                  $task = Task::add($name, $description, $project, $user,
+                    $status, $priority);
+                } else {
+                  throw new Exception('You cannot assign a task to a user outside the team');
+                }
+              } else {
+                $task = Task::add($name, $description, $project);
+              }
+              Session::unset('error');
+
+              header('Location: ../task?id=' . $task->id);
+              exit();
+            } else {
+              throw new Exception('You cannot add a task to a project you are not the lead of');
+            }
+          } else {
+            throw new Exception('Could not find project');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../tasks');
+        exit();
+        break;
+      }
+      case $IS_EDITING:
+      {
+        $id = Request::post('id');
+        $name = Request::post('name');
+        $description = Request::post('description');
+        $user = Session::get('user');
+        $user_id = Request::post('user_id');
+        $priority = TaskPriority::tryFrom(Request::post('priority'));
+        $status = TaskStatus::tryFrom(Request::post('status'));
+
+        try {
+          $task = Task::get($id);
+          if ($task !== null) {
+            $project = $task->project;
+            if ($user->is_in_team($project->team)) {
+              if ($user->id === $project->lead->id || $user->id === $task->user->id) {
+                if ($user_id !== 'null') {
+                  $user = User::get($user_id);
+                  if ($user !== null && $user->is_in_team($project->team)) {
+                    $task->update(
+                      $name,
+                      $description,
+                      $user,
+                      $status ?? $task->status,
+                      $priority ?? $task->priority
+                    );
+                  } else {
+                    throw new Exception('You cannot assign a task to a user outside the team');
+                  }
+                } else {
+                  $task->update(
+                    $name,
+                    $description,
+                    null,
+                    $status ?? $task->status,
+                    $priority ?? $task->priority
+                  );
+                }
+                Session::unset('error');
+
+                header('Location: ../task?id=' . $task->id);
+                exit();
+              } else {
+                throw new Exception('You cannot edit a task unless you are assigned to it or are the project lead');
+              }
+            } else {
+              throw new Exception('You cannot edit a task from a team you are not in');
+            }
+          } else {
+            throw new Exception('Could not find task');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../tasks');
+        exit();
+        break;
+      }
+      case $IS_DELETING:
+      {
+        $user = Session::get('user');
+        $id = Request::post('id');
+
+        try {
+          $task = Task::get($id);
+          if ($task !== null) {
+            if ($user->id === $task->id || $user->id === $task->project->lead->id) {
+              $task->remove();
+              Session::unset('error');
+            } else {
+              throw new Exception('You cannot delete a task unless you are assigned to it or are the project lead');
+            }
+          } else {
+            throw new Exception('Could not find task');
+          }
+        } catch (Exception $err) {
+          Session::set('error', $err->getMessage());
+        }
+
+        header('Location: ../tasks');
+        exit();
+        break;
+      }
+    }
+  }
 
   /**
    * @throws Exception
@@ -21,13 +184,13 @@ readonly class Task
     string        $name,
     string        $description,
     Project       $project,
+    ?User         $user = null,
     ?TaskStatus   $status = TaskStatus::NotStarted,
-    ?TaskPriority $priority = TaskPriority::Low,
-    ?User         $user = null
+    ?TaskPriority $priority = TaskPriority::Low
   ): Task|null
   {
     $id = Database::generate_id();
-
+    var_dump($status->value);
     $is_insert_successful = Database::query('
       INSERT INTO `tasks`
       VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -35,10 +198,10 @@ readonly class Task
         $id,
         $name,
         $description,
-        $project->id,
         $status->value,
         $priority->value,
-        $user->id
+        $user?->id,
+        $project->id
       ])["affected_rows"] == 1;
 
     return $is_insert_successful ? Task::get($id) : null;
@@ -65,7 +228,7 @@ readonly class Task
         Project::get($task['project_id']),
         TaskStatus::tryFrom($task['status']),
         TaskPriority::tryFrom($task['priority']),
-        User::get($task['user_id'])
+        $task['user_id'] ? User::get($task['user_id']) : null
       );
     } else {
       return null;
@@ -78,9 +241,9 @@ readonly class Task
   public function update(
     ?string       $name,
     ?string       $description,
+    ?User         $user,
     ?TaskStatus   $status,
-    ?TaskPriority $priority,
-    ?User         $user
+    ?TaskPriority $priority
   ): Task
   {
     $is_update_successful = Database::query('

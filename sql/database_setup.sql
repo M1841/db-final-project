@@ -63,8 +63,8 @@ CREATE TABLE `tasks`
   `id`          VARCHAR(64)  NOT NULL PRIMARY KEY,
   `name`        VARCHAR(64)  NOT NULL,
   `description` VARCHAR(255) NOT NULL,
-  `status`      VARCHAR(16)  NOT NULL,
-  `priority`    VARCHAR(16)  NOT NULL,
+  `status`      VARCHAR(64)  NOT NULL,
+  `priority`    VARCHAR(64)  NOT NULL,
   `user_id`     VARCHAR(64)  NULL,
   `project_id`  VARCHAR(64)  NOT NULL,
 
