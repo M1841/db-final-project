@@ -43,7 +43,8 @@ try {
 <body>
   <p><?= $team->name ?></p>
   <p><?= $team->description ?></p>
-
+  <p>Join code: <?= $team->id ?></p>
+  
   <p>Edit Team</p>
   <form method="POST" action="../api/Team.php">
     <input type="hidden" name="resource" value="team"/>

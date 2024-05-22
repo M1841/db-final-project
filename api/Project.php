@@ -128,7 +128,7 @@ readonly class Project
   /**
    * @throws Exception
    */
-  public static function add(
+  private static function add(
     string $name,
     string $description,
     User   $lead,
@@ -194,7 +194,7 @@ readonly class Project
   /**
    * @throws Exception
    */
-  public function update(
+  private function update(
     ?string $name,
     ?string $description
   ): Project
@@ -222,13 +222,30 @@ readonly class Project
   /**
    * @throws Exception
    */
-  public function remove(): bool
+  private function remove(): bool
   {
     return Database::query('
       DELETE
       FROM `projects`
       WHERE `id` = ?
     ', [$this->id])["affected_rows"] == 1;
+  }
+
+  public static function search(
+    string $query,
+    array  $projects,
+    ?bool  $in_name = true,
+    ?bool  $in_description = true
+  ): array
+  {
+    $result = [];
+    foreach ($projects as $project) {
+      if (($in_name && str_contains(strtolower($project->name), strtolower($query)))
+        || ($in_description && str_contains(strtolower($project->description), strtolower($query)))) {
+        $result[] = $project;
+      }
+    }
+    return $result;
   }
 }
 

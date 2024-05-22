@@ -153,7 +153,7 @@ readonly class Team
   /**
    * @throws Exception
    */
-  public static function add(
+  private static function add(
     string $name,
     string $description
   ): Team|null
@@ -236,7 +236,7 @@ readonly class Team
   /**
    * @throws Exception
    */
-  public function update(
+  private function update(
     ?string $name,
     ?string $description
   ): Team
@@ -262,13 +262,30 @@ readonly class Team
   /**
    * @throws Exception
    */
-  public function remove(): bool
+  private function remove(): bool
   {
     return Database::query('
       DELETE
       FROM `teams`
       WHERE `id` = ?
     ', [$this->id])["affected_rows"] == 1;
+  }
+
+  public static function search(
+    string $query,
+    array  $teams,
+    ?bool  $in_name = true,
+    ?bool  $in_description = true
+  ): array
+  {
+    $result = [];
+    foreach ($teams as $team) {
+      if (($in_name && str_contains(strtolower($team->name), strtolower($query)))
+        || ($in_description && str_contains(strtolower($team->description), strtolower($query)))) {
+        $result[] = $team;
+      }
+    }
+    return $result;
   }
 }
 

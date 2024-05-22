@@ -180,7 +180,7 @@ readonly class Task
   /**
    * @throws Exception
    */
-  public static function add(
+  private static function add(
     string        $name,
     string        $description,
     Project       $project,
@@ -238,7 +238,7 @@ readonly class Task
   /**
    * @throws Exception
    */
-  public function update(
+  private function update(
     ?string       $name,
     ?string       $description,
     ?User         $user,
@@ -277,13 +277,43 @@ readonly class Task
   /**
    * @throws Exception
    */
-  public function remove(): bool
+  private function remove(): bool
   {
     return Database::query('
       DELETE 
       FROM `tasks`
       WHERE `id` = ?
     ', [$this->id])["affected_rows"] == 1;
+  }
+
+  public static function search(
+    string $query,
+    array  $tasks,
+    ?array $statuses = [
+      TaskStatus::NotStarted->value,
+      TaskStatus::InProgress->value,
+      TaskStatus::Completed->value
+    ],
+    ?array $priorities = [
+      TaskPriority::Low->value,
+      TaskPriority::High->value
+    ],
+    ?bool  $in_name = true,
+    ?bool  $in_description = true
+  ): array
+  {
+    $result = [];
+    foreach ($tasks as $task) {
+      if ((($in_name && str_contains(strtolower($task->name), strtolower($query)))
+          || ($in_description && str_contains(strtolower($task->description), strtolower($query))))
+        && (!($statuses !== null)
+          || in_array($task->status->value, $statuses))
+        && (!($priorities !== null)
+          || in_array($task->priority->value, $priorities))) {
+        $result[] = $task;
+      }
+    }
+    return $result;
   }
 }
 

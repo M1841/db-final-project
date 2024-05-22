@@ -6,7 +6,7 @@ $name = $password = $is_registering = null;
 if ($auth_form = Session::get('auth_form')) {
   $name = htmlspecialchars($auth_form['name']);
   $password = htmlspecialchars($auth_form['password']);
-  $is_registering = $auth_form['auth_type'] === 'register';
+  $is_registering = $auth_form['action'] === 'register';
 }
 ?>
 
@@ -41,7 +41,7 @@ if ($auth_form = Session::get('auth_form')) {
       <?= $is_registering ? 'Welcome!' : 'Welcome Back!' ?>
     </h2>
     <form method="POST" action="../api/User.php">
-      <input type="hidden" name="auth_type" id="auth_type" required
+      <input type="hidden" name="action" id="action" required
         value="<?= $is_registering ? 'register' : 'login' ?>"/>
 
       <label for="name">
@@ -65,7 +65,7 @@ if ($auth_form = Session::get('auth_form')) {
       <input type="submit"
         value="<?= $is_registering ? 'Create account' : 'Log in' ?>"/>
     </form>
-    <button onclick="toggle_auth_type()" type="button" id="auth_type_toggle">
+    <button onclick="toggle_action()" type="button" id="action_toggle">
       <?= $is_registering ? 'Already have an account?' : 'Don\'t have an account?' ?>
     </button>
 
@@ -78,15 +78,15 @@ if ($auth_form = Session::get('auth_form')) {
   </main>
 
   <script>
-    function toggle_auth_type() {
-      let auth_type = document.getElementById("auth_type");
+    function toggle_action() {
+      let action = document.getElementById("action");
       let submit_button = document.querySelector("input[type=submit]");
-      let toggle_button = document.getElementById("auth_type_toggle")
+      let toggle_button = document.getElementById("action_toggle")
       let title = document.querySelector("h2");
 
-      let is_registering = auth_type.value === "register";
+      let is_registering = action.value === "register";
 
-      auth_type.value = is_registering ? "login" : "register";
+      action.value = is_registering ? "login" : "register";
       submit_button.value = is_registering ? "Log in" : "Create account";
       toggle_button.textContent = is_registering
         ? "Don't have an account?" : "Already have an account?";
@@ -105,7 +105,7 @@ if ($auth_form = Session::get('auth_form')) {
     }
 
     <?php if ($is_registering) { ?>
-    toggle_auth_type();
+    toggle_action();
     <?php } ?>
   </script>
 </body>

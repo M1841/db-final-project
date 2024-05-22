@@ -1,7 +1,8 @@
 <?php
-require_once __DIR__ . '/Session.php';
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Team.php';
+require_once __DIR__ . '/Request.php';
+require_once __DIR__ . '/Session.php';
 
 readonly class User
 {
@@ -14,28 +15,26 @@ readonly class User
 
   public static function router(): void
   {
-    $IS_AUTHENTICATING = $_SERVER['REQUEST_METHOD'] === 'POST'
-      && isset($_POST['name'])
-      && isset($_POST['password'])
-      && isset($_POST['auth_type'])
+    $IS_AUTHENTICATING = Request::method() === 'POST'
+      && Request::post('name')
+      && Request::post('password')
       && (
-        $_POST['auth_type'] === 'register'
-        || $_POST['auth_type'] === 'login'
+        Request::post('action') === 'register'
+        || Request::post('action') === 'login'
       );
 
-    $IS_LOGGING_OUT = $_SERVER['REQUEST_METHOD'] === 'POST'
-      && isset($_POST['auth_type'])
-      && $_POST['auth_type'] === 'logout';
+    $IS_LOGGING_OUT = Request::method() === 'POST'
+      && Request::post('action') === 'logout';
 
     switch (true) {
       case $IS_AUTHENTICATING:
       {
-        $name = $_POST['name'];
-        $password = $_POST['password'];
-        $auth_type = $_POST['auth_type'];
+        $name = Request::post('name');
+        $password = Request::post('password');
+        $action = Request::post('action');
 
         try {
-          $user = $auth_type === 'register'
+          $user = $action === 'register'
             ? User::register($name, $password)
             : User::login($name, $password);
 
@@ -50,7 +49,7 @@ readonly class User
           Session::set('auth_form', [
             'name' => $name,
             'password' => $password,
-            'auth_type' => $auth_type
+            'action' => $action
           ]);
 
           header('Location: ../');
@@ -113,7 +112,7 @@ readonly class User
   /**
    * @throws Exception
    */
-  public static function add(string $name, string $password): User|null
+  private static function add(string $name, string $password): User|null
   {
     $id = Database::generate_id();
     $password = password_hash($password, PASSWORD_BCRYPT);
@@ -189,7 +188,9 @@ readonly class User
     }
 
     foreach ($this->get_tasks() as $task) {
-      $projects[] = $task->project;
+      if (!in_array($task->project, $projects)) {
+        $projects[] = $task->project;
+      }
     }
 
     return $projects;
@@ -217,7 +218,7 @@ readonly class User
   /**
    * @throws Exception
    */
-  public function update(?string $name, ?string $password): User
+  private function update(?string $name, ?string $password): User
   {
     if ($name !== null) {
       $user_with_name = User::get($name);
