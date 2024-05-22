@@ -96,8 +96,7 @@ readonly class User
     $is_registered = $user !== null;
 
     if ($is_registered) {
-      $is_password_correct = password_verify($password, $user->password)
-        || $password == $user->password;
+      $is_password_correct = password_verify($password, $user->password);
 
       if ($is_password_correct) {
         return $user;

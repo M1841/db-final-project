@@ -47,7 +47,9 @@ $tasks = array_slice($user->get_tasks(), 0, 4);
     </nav>
 
     <form method="GET" action="./search">
-      <input type="text" name="query" required placeholder="Search"/>
+      <label for="query">
+        <input type="text" id="search" name="query" required placeholder="Search"/>
+      </label>
       <input type="submit" class="symbol" value="search"/>
     </form>
 
@@ -71,29 +73,57 @@ $tasks = array_slice($user->get_tasks(), 0, 4);
   <main>
     <section>
       <h2>Teams</h2>
-      <?php foreach ($teams as $team) { ?>
-        <a href="./team?id=<?= $team->id ?>">
-          <?= $team->name ?>
-        </a>
-      <?php } ?>
+      <div>
+        <?php foreach ($teams as $team) {
+          $member_count = count($team->get_members()); ?>
+          <a href="./team?id=<?= $team->id ?>">
+            <div>
+              <h3><?= $team->name ?></h3>
+              <span>
+                <?= $member_count ?>
+                Member<?= $member_count == 1 ? '' : 's' ?>
+              </span>
+            </div>
+            <p><?= $team->description ?></p>
+          </a>
+        <?php } ?>
+      </div>
     </section>
 
     <section>
       <h2>Projects</h2>
-      <?php foreach ($projects as $project) { ?>
-        <a href="./project?id=<?= $project->id ?>">
-          <?= $project->name ?>
-        </a>
-      <?php } ?>
+      <div>
+        <?php foreach ($projects as $project) {
+          $task_count = count($project->get_tasks()); ?>
+          <a href="./project?id=<?= $project->id ?>">
+            <div>
+              <h3><?= $project->name ?></h3>
+              <span>
+                <?= $task_count ?>
+                Task<?= $task_count == 1 ? '' : 's' ?>
+              </span>
+            </div>
+            <p><?= $project->description ?></p>
+          </a>
+        <?php } ?>
+      </div>
     </section>
 
     <section>
       <h2>Tasks</h2>
-      <?php foreach ($tasks as $task) { ?>
-        <a href="./task?id=<?= $task->id ?>">
-          <?= $task->name ?>
-        </a>
-      <?php } ?>
+      <div>
+        <?php foreach ($tasks as $task) { ?>
+          <a href="./task?id=<?= $task->id ?>">
+            <div>
+              <h3><?= $task->name ?></h3>
+              <span>
+                <?= $task->status->value ?>
+              </span>
+            </div>
+            <p><?= $task->description ?></p>
+          </a>
+        <?php } ?>
+      </div>
     </section>
   </main>
 
