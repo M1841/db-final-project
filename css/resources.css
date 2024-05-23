@@ -23,7 +23,7 @@ main > section > h2 {
 
 main > section > div {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 main > section > div > a {
@@ -34,7 +34,7 @@ main > section > div > a {
   outline: 0 solid transparent;
   outline-offset: 0;
   padding: 1rem;
-  width: 25%;
+  width: calc(33.33333% - 1rem);
 }
 
 main > section > div > a:focus {
@@ -59,7 +59,8 @@ main > section > div > a > div > h3 {
 
 main > section > div > a > div > span,
 main > section > div > a > p,
-main > section > div > span {
+main > section > div > span,
+main > section > div > a > div > p {
   color: #71717a;
   font-size: 0.875rem;
   line-height: 1.25rem;

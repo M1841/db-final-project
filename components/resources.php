@@ -4,16 +4,23 @@
     <div>
       <?php if ($teams) {
         foreach ($teams as $team) {
-          $member_count = count($team->get_members()); ?>
+          $member_count = count($team->get_members());
+          $project_count = count($team->get_projects()); ?>
           <a href="./team?id=<?= $team->id ?>">
             <div>
               <h3><?= $team->name ?></h3>
               <span>
-                <?= $member_count ?>
-                Member<?= $member_count == 1 ? '' : 's' ?>
-              </span>
+                  <?= $member_count ?>
+                  Member<?= $member_count == 1 ? '' : 's' ?>
+                </span>
             </div>
-            <p><?= $team->description ?></p>
+            <div>
+              <p><?= $team->description ?></p>
+              <p>
+                <?= $project_count ?>
+                Project<?= $project_count == 1 ? '' : 's' ?>
+              </p>
+            </div>
           </a>
         <?php }
       } else { ?>
@@ -54,10 +61,13 @@
             <div>
               <h3><?= $task->name ?></h3>
               <span>
-                <?= $task->status->value ?>
+                <?= $task->priority->value ?> Priority
               </span>
             </div>
-            <p><?= $task->description ?></p>
+            <div>
+              <p><?= $task->description ?></p>
+              <p><?= $task->status->value ?></p>
+            </div>
           </a>
         <?php }
       } else { ?>

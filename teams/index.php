@@ -37,7 +37,7 @@ if ($query) {
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
 
   <main>
-    <header>
+    <div>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
         Search Teams
@@ -80,39 +80,56 @@ if ($query) {
       </div>
       <div id="join_modal" tabindex="-1" class="hidden">
         <form method="POST" action="../api/Team.php">
+          <h3>Join a Team</h3>
           <input type="hidden" name="resource" value="team"/>
           <input type="hidden" name="action" value="join"/>
-          <input type="text" name="code" placeholder="Team Code"
-            minlength="36" maxlength="36" required/>
+          <label for="team_code">
+            <input type="text" name="code" placeholder="Team Code"
+              id="team_code" minlength="36" maxlength="36" required/>
+          </label>
           <input type="submit" value="Join"/>
         </form>
       </div>
       <div id="create_modal" tabindex="-1" class="hidden">
         <form method="POST" action="../api/Team.php">
+          <h3>Create a Team</h3>
           <input type="hidden" name="resource" value="team"/>
           <input type="hidden" name="action" value="create"/>
-          <input type="text" name="name" placeholder="Team Name" required/>
-          <textarea name="description" placeholder="Team Description"></textarea>
+          <label for="team_name">
+            <input type="text" name="name" placeholder="Team Name"
+              required id="team_name"/>
+          </label>
+          <label for="team_description">
+            <textarea name="description" placeholder="Team Description"
+              id="team_description"></textarea>
+          </label>
           <input type="submit" value="Create"/>
         </form>
       </div>
-    </header>
+    </div>
 
     <section>
       <h2>Your Teams</h2>
       <div>
         <?php if ($teams) {
           foreach ($teams as $team) {
-            $member_count = count($team->get_members()); ?>
+            $member_count = count($team->get_members());
+            $project_count = count($team->get_projects()); ?>
             <a href="./team?id=<?= $team->id ?>">
               <div>
                 <h3><?= $team->name ?></h3>
                 <span>
-                <?= $member_count ?>
-                Member<?= $member_count == 1 ? '' : 's' ?>
-              </span>
+                  <?= $member_count ?>
+                  Member<?= $member_count == 1 ? '' : 's' ?>
+                </span>
               </div>
-              <p><?= $team->description ?></p>
+              <div>
+                <p><?= $team->description ?></p>
+                <p>
+                  <?= $project_count ?>
+                  Project<?= $project_count == 1 ? '' : 's' ?>
+                </p>
+              </div>
             </a>
           <?php }
         } else { ?>

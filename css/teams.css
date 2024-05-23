@@ -2,15 +2,14 @@ main {
   display: flex;
   flex-direction: column;
   gap: 1.5rem !important;
-  padding-top: 0.5rem !important;
 }
 
-main > header {
+main > div {
   display: flex;
   gap: 0.5rem;
 }
 
-main > header > button {
+main > div > button {
   align-items: center;
   background: #18181b;
   border-radius: 0.375rem;
@@ -26,23 +25,23 @@ main > header > button {
   outline-offset: 0;
   padding: 0.5rem;
   transition: all 100ms;
-  width: 9rem;
+  width: 10rem;
 }
 
-main > header > button:focus-visible, main > header > button:hover {
+main > div > button:focus-visible, main > div > button:hover {
   outline: 4px #d4d4d8 solid;
 }
 
-main > header > button:active {
+main > div > button:active {
   background: #3f3f46;
 }
 
-main > header > button > i {
+main > div > button > i {
   font-size: 1.125rem !important;
   line-height: 1.75rem !important;
 }
 
-main > header > div {
+main > div > div {
   align-items: center;
   display: flex;
   height: 100vh;
@@ -54,7 +53,7 @@ main > header > div {
   z-index: 50;
 }
 
-main > header > div > form {
+main > div > div > form {
   background: #fafafa;
   border: #e4e4e7 1px solid;
   border-radius: 0.375rem;
@@ -65,11 +64,15 @@ main > header > div > form {
   padding: 1rem;
 }
 
-main > header > div > form > h3 {
+main > div > div > form > h3 {
   font-weight: 600;
+  width: 24rem;
 }
 
-main > header > div > form > label > input[type="text"] {
+main > div > div > form > label > input[type="text"],
+main > div > div > form > label > textarea,
+main > div > div > form > label > select,
+main > div > div > form > label > select > option {
   border: 1px solid #e4e4e7;
   border-radius: 0.375rem;
   font-size: 0.875rem;
@@ -82,31 +85,58 @@ main > header > div > form > label > input[type="text"] {
   width: 24rem;
 }
 
-main > header > div > form > label > input[type="text"]:focus-visible {
+main > div > div > form > label > input[type="text"]:focus-visible,
+main > div > div > form > label > textarea:focus-visible,
+main > div > div > form > label > select:focus-visible,
+main > div > div > form > label > select > option:focus {
   outline: 4px #f4f4f5 solid;
 }
 
-main > header > div > form > label > input[type="text"]:hover {
+main > div > div > form > label > input[type="text"]:hover,
+main > div > div > form > label > textarea:hover,
+main > div > div > form > label > select:hover,
+main > div > div > form > label > select > option:hover {
   background: #f4f4f5;
 }
 
-main > header > div > form > fieldset {
+main > div > div > form > fieldset {
   display: flex;
   gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+main > div > div > form > fieldset:last-of-type {
   margin-bottom: 1rem;
 }
 
-main > header > div > form > fieldset > label {
+main > div > div > form > fieldset > label {
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
-main > header > div > form > div {
+input[type="checkbox"] {
+  accent-color: #18181b;
+  border: 0 solid transparent;
+  outline: 0 solid transparent;
+  outline-offset: 0;
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px #e4e4e7 solid;
+}
+
+legend {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+}
+
+main > div > div > form > div {
   display: flex;
   gap: 0.5rem;
 }
 
-main > header > div > form > div > input {
+main > div > div > form input[type="submit"] {
   background: #18181b !important;
   border-radius: 0.375rem;
   color: #fafafa;
@@ -117,18 +147,19 @@ main > header > div > form > div > input {
   outline-offset: 0;
   padding: 0.5rem;
   transition: all 100ms;
-  width: 50%;
+  width: 100%;
 }
 
-main > header > div > form > div > input:focus-visible {
+main > div > div > form input[type="submit"]:focus-visible {
   outline: 4px #e4e4e7 solid;
 }
 
-main > header > div > form > div > input:hover {
+main > div > div > form input[type="submit"]:hover {
   background: #f4f4f5;
 }
 
-main > header > div > form > div > a {
+main > div > div > form > div > a,
+main > div > div > form > div > button {
   border: 1px solid #e4e4e7;
   border-radius: 0.375rem;
   color: #71717a;
@@ -138,14 +169,16 @@ main > header > div > form > div > a {
   padding: 0.5rem;
   text-align: center;
   transition: all 100ms;
-  width: 50%;
+  width: 100%;
 }
 
-main > header > div > form > div > a:focus-visible {
+main > div > div > form > div > a:focus-visible,
+main > div > div > form > div > button:focus-visible {
   outline: 4px #f4f4f5 solid;
 }
 
-main > header > div > form > div > a:hover {
+main > div > div > form > div > a:hover,
+main > div > div > form > div > button:hover {
   background: #f4f4f5;
 }
 
