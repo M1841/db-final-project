@@ -14,15 +14,13 @@ if ($user === null) {
 $teams = $user->get_teams();
 $projects = $user->get_projects();
 $tasks = $user->get_tasks();
-$query = Request::get('query');
+$query = Request::get('query') ?? '';
 $statuses = Request::get_array('status');
 $priorities = Request::get_array('priority');
-if ($query) {
-  $tasks = Task::search(
-    $query, $tasks,
-    $statuses, $priorities,
-    !Request::get('name'), !Request::get('description'));
-}
+$tasks = Task::search(
+  $query, $tasks,
+  $statuses, $priorities,
+  !Request::get('name'), !Request::get('description'));
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -35,7 +33,7 @@ if ($query) {
 </head>
 <body>
   <form method="GET" action="./tasks">
-    <input type="text" name="query" required
+    <input type="text" name="query"
       placeholder="Search" value="<?= $query ?>"/>
     <input type="submit" class="symbol" value="search"/>
     <a href="./tasks">Clear</a>

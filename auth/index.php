@@ -28,14 +28,14 @@ if ($auth_form = Session::get('auth_form')) {
   <aside>
     <h1>
       <i class="symbol">inventory</i>
-      App Title
+      AppName
     </h1>
   </aside>
 
   <main id="app">
     <h1>
       <i class="symbol">inventory</i>
-      App Title
+      AppName
     </h1>
     <h2>
       <?= $is_registering ? 'Welcome!' : 'Welcome Back!' ?>
