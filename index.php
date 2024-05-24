@@ -42,9 +42,21 @@ if ($query = Request::get('search')) {
 </head>
 
 <body>
-  <?php
-  require_once __DIR__ . '/components/navbar.php';
-  require_once __DIR__ . '/components/resources.php';
-  ?>
+  <?php require_once __DIR__ . '/components/navbar.php'; ?>
+  <main>
+    <section>
+      <h2>Teams</h2>
+      <?php require_once __DIR__ . '/components/teams.php'; ?>
+    </section>
+    <section>
+      <h2>Projects</h2>
+      <?php require_once __DIR__ . '/components/projects.php'; ?>
+    </section>
+    <section>
+      <h2>Tasks</h2>
+      <?php require_once __DIR__ . '/components/tasks.php'; ?>
+    </section>
+    <?php require_once __DIR__ . '/components/error.php' ?>
+  </main>
 </body>
 </html>

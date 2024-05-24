@@ -13,7 +13,7 @@ abstract class Database
   /**
    * @throws Exception
    */
-  public static function query(string $query_string, ?array $params = NULL):
+  public static function query(string $query_string, ?array $params = null):
   array
   {
     $connection = new mysqli('localhost', 'root', '', 'db_final_project', '3306');

@@ -1,7 +1,8 @@
 <?php
 require_once __DIR__ . '/../api/Session.php';
 
-$name = $password = $is_registering = null;
+$name = $password = null;
+$is_registering = true;
 
 if ($auth_form = Session::get('auth_form')) {
   $name = htmlspecialchars($auth_form['name']);
@@ -103,10 +104,6 @@ if ($auth_form = Session::get('auth_form')) {
       visibility_button.textContent = is_password_visible
         ? "visibility_off" : "visibility";
     }
-
-    <?php if ($is_registering) { ?>
-    toggle_action();
-    <?php } ?>
   </script>
 </body>
 </html>

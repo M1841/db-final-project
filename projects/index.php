@@ -28,7 +28,7 @@ if ($query) {
   <title>Projects</title>
 
   <link rel="stylesheet" href="../css/base.css"/>
-  <link rel="stylesheet" href="../css/teams.css"/>
+  <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/index.css"/>
   <link rel="stylesheet" href="../css/navbar.css"/>
   <link rel="stylesheet" href="../css/resources.css"/>
@@ -40,7 +40,12 @@ if ($query) {
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
 
   <main>
-    <div>
+    <section>
+      <h2>Your Projects</h2>
+      <?php require_once __DIR__ . '/../components/projects.php' ?>
+    </section>
+
+    <footer>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
         Search Projects
@@ -103,40 +108,9 @@ if ($query) {
           <input type="submit" value="Create"/>
         </form>
       </div>
-    </div>
+    </footer>
 
-    <section>
-      <h2>Your Projects</h2>
-      <div>
-        <?php if ($projects) {
-          foreach ($projects as $project) {
-            $task_count = count($project->get_tasks()); ?>
-            <a href="./project?id=<?= $project->id ?>">
-              <div>
-                <h3><?= $project->name ?></h3>
-                <span>
-                <?= $task_count ?>
-                Task<?= $task_count == 1 ? '' : 's' ?>
-              </span>
-              </div>
-              <p><?= $project->description ?></p>
-            </a>
-          <?php }
-        } else { ?>
-          <span>No projects found</span>
-        <?php } ?>
-      </div>
-    </section>
-
-    <?php
-    if (Session::get('error') !== null) { ?>
-      <div>
-        <p><?= Session::get('error') ?></p>
-      </div>
-      <?php
-      Session::unset('error');
-    }
-    ?>
+    <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
 
 </body>

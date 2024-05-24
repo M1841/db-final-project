@@ -32,7 +32,7 @@ $tasks = Task::search(
   <title>Tasks</title>
 
   <link rel="stylesheet" href="../css/base.css"/>
-  <link rel="stylesheet" href="../css/teams.css"/>
+  <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/index.css"/>
   <link rel="stylesheet" href="../css/navbar.css"/>
   <link rel="stylesheet" href="../css/resources.css"/>
@@ -44,7 +44,12 @@ $tasks = Task::search(
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
 
   <main>
-    <div>
+    <section>
+      <h2>Your Tasks</h2>
+      <?php require_once __DIR__ . '/../components/tasks.php' ?>
+    </section>
+
+    <footer>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
         Search Tasks
@@ -153,39 +158,7 @@ $tasks = Task::search(
           <input type="submit" value="Create"/>
         </form>
       </div>
-    </div>
-    <section>
-      <h2>Your Tasks</h2>
-      <div>
-        <?php if ($tasks) {
-          foreach ($tasks as $task) { ?>
-            <a href="./task?id=<?= $task->id ?>">
-              <div>
-                <h3><?= $task->name ?></h3>
-                <span>
-                <?= $task->priority->value ?> Priority
-              </span>
-              </div>
-              <div>
-                <p><?= $task->description ?></p>
-                <p><?= $task->status->value ?></p>
-              </div>
-            </a>
-          <?php }
-        } else { ?>
-          <span>No tasks found</span>
-        <?php } ?>
-      </div>
-    </section>
+    </footer>
 
-    <?php
-    if (Session::get('error') !== null) { ?>
-      <div>
-        <p><?= Session::get('error') ?></p>
-      </div>
-      <?php
-      Session::unset('error');
-    }
-    ?>
-  </main>
+    <?php require_once __DIR__ . '/../components/error.php' ?>
 </body>

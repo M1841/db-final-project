@@ -116,7 +116,8 @@ body > header > button:hover {
   background: #f4f4f5;
 }
 
-body > header > button > div {
+body > header > button > div,
+main > div > aside > div > div > div {
   align-items: center;
   aspect-ratio: 1 / 1;
   background: #d4d4d8;
@@ -131,7 +132,8 @@ body > header > button > div {
   position: absolute;
 }
 
-body > header > button > div > span {
+body > header > button > div > span,
+main > div > aside > div > div > div > span {
   align-items: center;
   display: flex;
   height: 1.5rem;

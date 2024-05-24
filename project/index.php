@@ -41,84 +41,126 @@ try {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title><?= $project->name ?></title>
+
+  <link rel="stylesheet" href="../css/base.css"/>
+  <link rel="stylesheet" href="../css/main.css"/>
+  <link rel="stylesheet" href="../css/index.css"/>
+  <link rel="stylesheet" href="../css/navbar.css"/>
+  <link rel="stylesheet" href="../css/resources.css"/>
+
+  <script src="../lib/tailwind.min.js"></script>
+  <script src="../lib/flowbite.min.js"></script>
 </head>
 <body>
-  <p><?= $project->name ?></p>
-  <p><?= $project->description ?></p>
+  <?php require_once __DIR__ . '/../components/navbar.php' ?>
 
-  <p>Edit Project</p>
-  <form method="POST" action="../api/Project.php">
-    <input type="hidden" name="resource" value="project"/>
-    <input type="hidden" name="action" value="edit"/>
-    <input type="hidden" name="id" value="<?= $project->id ?>"/>
+  <main>
+    <header>
+      <h1>
+        <i class="symbol">design_services</i>
+        <?= $project->name ?>
+      </h1>
+      <p><?= $project->description ?></p>
+      <span>Project lead: <?= $project->lead->name ?></span>
+    </header>
 
-    <input type="text" name="name" placeholder="Name" required
-      value="<?= $project->name ?>"/>
-    <textarea name="description" placeholder="Description"
-    ><?= $project->description ?></textarea>
+    <section>
+      <h2>Tasks</h2>
+      <?php require_once __DIR__ . '/../components/tasks.php' ?>
+    </section>
 
-    <input type="submit" value="Edit"/>
-  </form>
+    <footer>
+      <button data-modal-target="edit_modal" data-modal-toggle="edit_modal">
+        <i class="symbol">edit</i>
+        Edit Project
+      </button>
+      <button data-modal-target="create_modal" data-modal-toggle="create_modal">
+        <i class="symbol">add</i>
+        Create a Task
+      </button>
+      <button data-modal-target="delete_modal"
+        data-modal-toggle="delete_modal">
+        <i class="symbol">delete</i>
+        Delete Project
+      </button>
 
-  <p>Delete Project</p>
-  <form method="POST" action="../api/Project.php">
-    <input type="hidden" name="resource" value="project"/>
-    <input type="hidden" name="action" value="delete"/>
-    <input type="hidden" name="id" value="<?= $project->id ?>"/>
-    <input type="submit" value="Delete"/>
-  </form>
+      <div id="edit_modal" tabindex="-1" class="hidden">
+        <form method="POST" action="../api/Project.php">
+          <h3>Edit Project</h3>
+          <input type="hidden" name="resource" value="project"/>
+          <input type="hidden" name="action" value="edit"/>
+          <input type="hidden" name="id" value="<?= $project->id ?>"/>
+          <label for="project_name">
+            <input type="text" name="name" placeholder="Project Name"
+              required id="project_name" value="<?= $project->name ?>"/>
+          </label>
+          <label for="project_description">
+            <textarea name="description" placeholder="Project Description"
+              id="project_description"><?= $project->description ?></textarea>
+          </label>
+          <input type="submit" value="Edit"/>
+        </form>
+      </div>
+      <div id="create_modal" tabindex="-1" class="hidden">
+        <form method="POST" action="../api/Task.php">
+          <h3>Create a Task</h3>
+          <input type="hidden" name="resource" value="task"/>
+          <input type="hidden" name="action" value="create"/>
+          <input type="hidden" name="project_id" value="<?= $project->id ?>"/>
+          <label for="task_status">
+            <select name="status" required id="task_status">
+              <option value="">Choose a Status</option>
+              <?php foreach (TaskStatus::cases() as $case) { ?>
+                <option value="<?= $case->value ?>">
+                  <?= $case->value ?>
+                </option>
+              <?php } ?>
+            </select>
+          </label>
+          <label for="task_priority">
+            <select name="priority" required id="task_priority">
+              <option value="">Choose a Priority</option>
+              <?php foreach (TaskPriority::cases() as $case) { ?>
+                <option value="<?= $case->value ?>">
+                  <?= $case->value ?>
+                </option>
+              <?php } ?>
+            </select>
+          </label>
+          <label for="task_user_id">
+            <select name="user_id" required id="task_user_id">
+              <option value="null">Unassigned</option>
+              <?php foreach ($members as $member) { ?>
+                <option value="<?= $member->id ?>">
+                  <?= $member->name ?>
+                </option>
+              <?php } ?>
+            </select>
+          </label>
+          <label for="task_name">
+            <input type="text" name="name" placeholder="Task Name"
+              required id="task_name"/>
+          </label>
+          <label for="task_description">
+            <textarea name="description" placeholder="Task Description"
+              id="task_description"></textarea>
+          </label>
+          <input type="submit" value="Create"/>
+        </form>
+      </div>
+      <div id="delete_modal" tabindex="-1" class="hidden">
+        <form method="POST" action="../api/Project.php">
+          <h3>Are you sure?</h3>
+          <input type="hidden" name="resource" value="project"/>
+          <input type="hidden" name="action" value="delete"/>
+          <input type="hidden" name="id" value="<?= $project->id ?>"/>
+          <div>
+            <input type="submit" value="Yes, delete"/>
+          </div>
+        </form>
+      </div>
+    </footer>
 
-
-  <p>Tasks</p>
-  <ul>
-    <?php foreach ($tasks as $task) { ?>
-      <li>
-        <a href="../task?id=<?= $task->id ?>">
-          <p><?= $task->name ?></p>
-          <p><?= $task->description ?></p>
-        </a>
-      </li>
-    <?php } ?>
-  </ul>
-
-  <p>Create a Task</p>
-  <form method="POST" action="../api/Task.php">
-    <input type="hidden" name="resource" value="task"/>
-    <input type="hidden" name="action" value="create"/>
-    <input type="hidden" name="project_id" value="<?= $project->id ?>"/>
-
-    <input type="text" name="name" placeholder="Name" required/>
-    <textarea name="description" placeholder="Description"></textarea>
-
-    <select name="priority" required>
-      <?php foreach (TaskPriority::cases() as $case) { ?>
-        <option value="<?= $case->value ?>">
-          <?= $case->value ?>
-        </option>
-      <?php } ?>
-    </select>
-
-    <select name="status" required>
-      <?php foreach (TaskStatus::cases() as $case) { ?>
-        <option value="<?= $case->value ?>">
-          <?= $case->value ?>
-        </option>
-      <?php } ?>
-    </select>
-
-    <select name="user_id" required>
-      <option value="null">Unassigned</option>
-      <?php foreach ($members as $member) { ?>
-        <option value="<?= $member->id ?>">
-          <?= $member->name ?>
-        </option>
-      <?php } ?>
-    </select>
-    <input type="submit" value="Create"/>
-  </form>
-
-  <?php
-  echo(Session::get('error'));
-  Session::unset('error');
-  ?>
+    <?php require_once __DIR__ . '/../components/error.php' ?>
+  </main>
 </body>

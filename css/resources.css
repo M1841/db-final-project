@@ -11,22 +11,26 @@ main {
   }
 }
 
-main > section {
+main > section,
+main > div > section {
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-main > section > h2 {
+main > section > h2,
+main > div > section > h2 {
   font-weight: 600;
 }
 
-main > section > div {
+main > section > div,
+main > div > section > div {
   display: flex;
   gap: 1rem;
 }
 
-main > section > div > a {
+main > section > div > a,
+main > div > section > div > a {
   background: #fafafa;
   border: #e4e4e7 1px solid;
   border-radius: 0.375rem;
@@ -37,36 +41,53 @@ main > section > div > a {
   width: calc(33.33333% - 1rem);
 }
 
-main > section > div > a:focus {
+main > section > div > a:focus,
+main > div > section > div > a:focus {
   filter: drop-shadow(0 0px 0px rgb(0 0 0 / 0));
   outline: 4px #e4e4e7 solid;
 }
 
-main > section > div > a:hover {
+main > section > div > a:hover,
+main > div > section > div > a:hover {
   background: #f4f4f5;
 }
 
-main > section > div > a > div {
+main > section > div > a > div,
+main > div > section > div > a > div {
   display: flex;
   justify-content: space-between;
 }
 
-main > section > div > a > div > h3 {
+main > section > div > a > div > h3,
+main > div > section > div > a > div > h3 {
+  align-items: center;
+  display: flex;
   font-size: 1rem;
   font-weight: 500;
+  gap: 0.25rem;
   line-height: 1.5rem;
+}
+
+main > section > div > a > div > h3 > i,
+main > div > section > div > a > div > h3 > i {
+  font-size: 1.125rem !important;
+  line-height: 1.75rem !important;
 }
 
 main > section > div > a > div > span,
 main > section > div > a > p,
 main > section > div > span,
-main > section > div > a > div > p {
+main > section > div > a > div > p,
+main > div > section > div > a > div > span,
+main > div > section > div > a > p,
+main > div > section > div > span,
+main > div > section > div > a > div > p {
   color: #71717a;
   font-size: 0.875rem;
   line-height: 1.25rem;
 }
 
-main > div {
+main > footer {
   bottom: 2rem;
   display: flex;
   justify-content: center;
@@ -75,7 +96,7 @@ main > div {
   width: 100%;
 }
 
-main > div > p {
+main > footer > p {
   background: #ffe4e6;
   border-left: 4px #fb7185 solid;
   border-radius: 0.375rem;

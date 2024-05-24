@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../api/User.php';
 require_once __DIR__ . '/../api/Team.php';
+require_once __DIR__ . '/../api/Project.php';
+require_once __DIR__ . '/../api/Task.php';
 require_once __DIR__ . '/../api/Request.php';
 require_once __DIR__ . '/../api/Session.php';
 
@@ -41,7 +43,7 @@ try {
   <title><?= $team->name ?></title>
 
   <link rel="stylesheet" href="../css/base.css"/>
-  <link rel="stylesheet" href="../css/teams.css"/>
+  <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/index.css"/>
   <link rel="stylesheet" href="../css/navbar.css"/>
   <link rel="stylesheet" href="../css/resources.css"/>
@@ -54,13 +56,36 @@ try {
 
   <main>
     <header>
-      <h1><?= $team->name ?></h1>
+      <h1>
+        <i class="symbol">group</i>
+        <?= $team->name ?>
+      </h1>
       <p><?= $team->description ?></p>
     </header>
     <div>
-      <button onclick="copy_team_code()">
+      <aside>
+        <h2>Members</h2>
+        <div>
+          <?php foreach ($members as $member) { ?>
+            <div>
+              <div>
+                <span><?= mb_strtoupper($member->name[0]) ?></span>
+              </div>
+              <?= $member->name ?>
+            </div>
+          <?php } ?>
+        </div>
+      </aside>
+      <section>
+        <h2>Projects</h2>
+        <?php require_once __DIR__ . '/../components/projects.php' ?>
+      </section>
+    </div>
+
+    <footer>
+      <button onclick="copy_team_code()" id="copy_button">
         <i class="symbol">content_copy</i>
-        Copy Code
+        <span>Copy Code</span>
       </button>
       <button data-modal-target="edit_modal" data-modal-toggle="edit_modal">
         <i class="symbol">edit</i>
@@ -119,48 +144,13 @@ try {
           <input type="hidden" name="id" value="<?= $team->id ?>"/>
           <div>
             <input type="submit" value="Yes, delete"/>
-            <button>Nevermind</button>
           </div>
         </form>
       </div>
-    </div>
+    </footer>
 
-    <?php
-    if (Session::get('error') !== null) { ?>
-      <div>
-        <p><?= Session::get('error') ?></p>
-      </div>
-      <?php
-      Session::unset('error');
-    }
-    ?>
+    <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
-
-  <p>Members</p>
-  <ul>
-    <?php foreach ($members as $member) { ?>
-      <li>
-        <p><?= $member->name ?></p>
-      </li>
-    <?php } ?>
-  </ul>
-
-  <p>Projects</p>
-  <ul>
-    <?php foreach ($projects as $project) { ?>
-      <li>
-        <a href="../project?id=<?= $project->id ?>">
-          <p><?= $project->name ?></p>
-          <p><?= $project->description ?></p>
-        </a>
-      </li>
-    <?php } ?>
-  </ul>
-
-  <?php
-  echo(Session::get('error'));
-  Session::unset('error');
-  ?>
 
   <script>
     function copy_team_code() {
@@ -171,6 +161,17 @@ try {
       temp_textarea.select();
       document.execCommand("copy");
       document.body.removeChild(temp_textarea);
+
+      const copy_button = document.getElementById("copy_button");
+      const [symbol, text] = copy_button.children;
+      console.log(symbol);
+      console.log(text);
+      symbol.textContent = "check";
+      text.textContent = "Copied";
+      setTimeout(() => {
+        symbol.textContent = "content_copy";
+        text.textContent = "Copy Code"
+      }, 1500);
     }
   </script>
 </body>

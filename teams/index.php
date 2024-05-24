@@ -25,7 +25,7 @@ if ($query) {
   <title>Teams</title>
 
   <link rel="stylesheet" href="../css/base.css"/>
-  <link rel="stylesheet" href="../css/teams.css"/>
+  <link rel="stylesheet" href="../css/main.css"/>
   <link rel="stylesheet" href="../css/index.css"/>
   <link rel="stylesheet" href="../css/navbar.css"/>
   <link rel="stylesheet" href="../css/resources.css"/>
@@ -37,7 +37,12 @@ if ($query) {
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
 
   <main>
-    <div>
+    <section>
+      <h2>Your Teams</h2>
+      <?php require_once __DIR__ . '/../components/teams.php' ?>
+    </section>
+
+    <footer>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
         Search Teams
@@ -106,46 +111,8 @@ if ($query) {
           <input type="submit" value="Create"/>
         </form>
       </div>
-    </div>
+    </footer>
 
-    <section>
-      <h2>Your Teams</h2>
-      <div>
-        <?php if ($teams) {
-          foreach ($teams as $team) {
-            $member_count = count($team->get_members());
-            $project_count = count($team->get_projects()); ?>
-            <a href="./team?id=<?= $team->id ?>">
-              <div>
-                <h3><?= $team->name ?></h3>
-                <span>
-                  <?= $member_count ?>
-                  Member<?= $member_count == 1 ? '' : 's' ?>
-                </span>
-              </div>
-              <div>
-                <p><?= $team->description ?></p>
-                <p>
-                  <?= $project_count ?>
-                  Project<?= $project_count == 1 ? '' : 's' ?>
-                </p>
-              </div>
-            </a>
-          <?php }
-        } else { ?>
-          <span>No teams found</span>
-        <?php } ?>
-      </div>
-    </section>
-
-    <?php
-    if (Session::get('error') !== null) { ?>
-      <div>
-        <p><?= Session::get('error') ?></p>
-      </div>
-      <?php
-      Session::unset('error');
-    }
-    ?>
+    <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
 </body>
