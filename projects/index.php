@@ -15,7 +15,7 @@ $teams = $user->get_teams();
 $projects = $user->get_projects();
 $query = Request::get('search');
 if ($query) {
-  $projects = Project::search($query, $projects, !Request::get('name'), !Request::get('description'));
+  $projects = Project::search($query, !Request::get('name'), !Request::get('description'));
 }
 ?>
 <!DOCTYPE html>

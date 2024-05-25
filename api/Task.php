@@ -286,9 +286,11 @@ readonly class Task
     ', [$this->id])["affected_rows"] == 1;
   }
 
+  /**
+   * @throws Exception
+   */
   public static function search(
     string $query,
-    array  $tasks,
     ?array $statuses = [
       TaskStatus::NotStarted->value,
       TaskStatus::InProgress->value,
@@ -302,18 +304,32 @@ readonly class Task
     ?bool  $in_description = true
   ): array
   {
-    $result = [];
-    foreach ($tasks as $task) {
-      if ((($in_name && str_contains(strtolower($task->name), strtolower($query)))
-          || ($in_description && str_contains(strtolower($task->description), strtolower($query))))
-        && (!($statuses !== null)
-          || in_array($task->status->value, $statuses))
-        && (!($priorities !== null)
-          || in_array($task->priority->value, $priorities))) {
-        $result[] = $task;
-      }
+    $statuses_placeholder = implode(',', array_fill(0, count($statuses), '?'));
+    $priorities_placeholder = implode(',', array_fill(0, count($priorities), '?'));
+    $tasks_result = Database::query("
+      SELECT `id`
+      FROM `tasks`
+      WHERE ((
+          ? AND LOWER(`name`) LIKE ?
+        ) OR (
+          ? AND LOWER(`description`) LIKE ?
+        )
+      ) AND (
+        ? OR `status` IN ($statuses_placeholder)
+      ) AND (
+        ? OR `priority` IN ($priorities_placeholder)
+      )
+    ", array_merge(
+      [$in_name, strtolower('%' . $query . '%'),
+        $in_description, strtolower('%' . $query . '%')],
+      [$statuses === null], $statuses,
+      [$priorities === null], $priorities
+    ))["result"];
+    $tasks = [];
+    foreach ($tasks_result as $task_result) {
+      $tasks[] = Task::get($task_result['id']);
     }
-    return $result;
+    return $tasks;
   }
 }
 

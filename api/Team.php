@@ -271,21 +271,32 @@ readonly class Team
     ', [$this->id])["affected_rows"] == 1;
   }
 
+  /**
+   * @throws Exception
+   */
   public static function search(
     string $query,
-    array  $teams,
     ?bool  $in_name = true,
     ?bool  $in_description = true
   ): array
   {
-    $result = [];
-    foreach ($teams as $team) {
-      if (($in_name && str_contains(strtolower($team->name), strtolower($query)))
-        || ($in_description && str_contains(strtolower($team->description), strtolower($query)))) {
-        $result[] = $team;
-      }
+    $teams_result = Database::query('
+      SELECT `id`
+      FROM `teams`
+      WHERE (
+        ? AND LOWER(`name`) LIKE ?
+      ) OR (
+        ? AND LOWER(`description`) LIKE ?
+      )
+    ', [
+      $in_name, strtolower('%' . $query . '%'),
+      $in_description, strtolower('%' . $query . '%')
+    ])["result"];
+    $teams = [];
+    foreach ($teams_result as $team_result) {
+      $teams[] = Team::get($team_result["id"]);
     }
-    return $result;
+    return $teams;
   }
 }
 

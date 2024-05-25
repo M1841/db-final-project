@@ -106,6 +106,7 @@ try {
           <h3>Edit Team</h3>
           <input type="hidden" name="resource" value="team"/>
           <input type="hidden" name="action" value="edit"/>
+          <input type="hidden" name="id" value="<?= $team->id ?>"/>
           <label for="team_name">
             <input type="text" name="name" placeholder="Team Name"
               required id="team_name" value="<?= $team->name ?>"/>

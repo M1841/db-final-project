@@ -12,7 +12,7 @@ if ($user === null) {
 $teams = $user->get_teams();
 $query = Request::get('search');
 if ($query) {
-  $teams = Team::search($query, $teams, !Request::get('name'), !Request::get('description'));
+  $teams = Team::search($query, !Request::get('name'), !Request::get('description'));
 }
 ?>
 <!DOCTYPE html>

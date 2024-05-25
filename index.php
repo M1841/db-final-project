@@ -12,9 +12,9 @@ if ($user === null) {
 }
 
 if ($query = Request::get('search')) {
-  $teams = Team::search($query, $user->get_teams());
-  $projects = Project::search($query, $user->get_projects());
-  $tasks = Task::search($query, $user->get_tasks());
+  $teams = Team::search($query);
+  $projects = Project::search($query);
+  $tasks = Task::search($query);
 } else {
   $teams = array_slice($user->get_teams(), 0, 4);
   $projects = array_slice($user->get_projects(), 0, 4);

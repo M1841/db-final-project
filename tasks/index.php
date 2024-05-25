@@ -14,13 +14,20 @@ if ($user === null) {
 $teams = $user->get_teams();
 $projects = $user->get_projects();
 $tasks = $user->get_tasks();
-$query = Request::get('query') ?? '';
-$statuses = Request::get_array('status');
-$priorities = Request::get_array('priority');
-$tasks = Task::search(
-  $query, $tasks,
-  $statuses, $priorities,
-  !Request::get('name'), !Request::get('description'));
+$query = Request::get('search');
+if ($query) {
+  $statuses = Request::get_array('status');
+  $priorities = Request::get_array('priority');
+  $tasks = Task::search($query, $statuses ?? [
+    TaskStatus::NotStarted->value,
+    TaskStatus::InProgress->value,
+    TaskStatus::Completed->value
+  ], $priorities ?? [
+    TaskPriority::Low->value,
+    TaskPriority::High->value
+  ],
+    !Request::get('name'), !Request::get('description'));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

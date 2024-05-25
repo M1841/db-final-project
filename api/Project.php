@@ -231,21 +231,32 @@ readonly class Project
     ', [$this->id])["affected_rows"] == 1;
   }
 
+  /**
+   * @throws Exception
+   */
   public static function search(
     string $query,
-    array  $projects,
     ?bool  $in_name = true,
     ?bool  $in_description = true
   ): array
   {
-    $result = [];
-    foreach ($projects as $project) {
-      if (($in_name && str_contains(strtolower($project->name), strtolower($query)))
-        || ($in_description && str_contains(strtolower($project->description), strtolower($query)))) {
-        $result[] = $project;
-      }
+    $projects_result = Database::query('
+      SELECT `id`
+      FROM `projects`
+      WHERE (
+        ? AND LOWER(`name`) LIKE ?
+      ) OR (
+        ? AND LOWER(`description`) LIKE ?
+      )
+    ', [
+      $in_name, strtolower('%' . $query . '%'),
+      $in_description, strtolower('%' . $query . '%')
+    ])["result"];
+    $projects = [];
+    foreach ($projects_result as $project_result) {
+      $projects[] = Project::get($project_result["id"]);
     }
-    return $result;
+    return $projects;
   }
 }
 
