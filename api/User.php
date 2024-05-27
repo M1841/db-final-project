@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/Database.php';
 require_once __DIR__ . '/Team.php';
+require_once __DIR__ . '/Project.php';
+require_once __DIR__ . '/Task.php';
 require_once __DIR__ . '/Request.php';
 require_once __DIR__ . '/Session.php';
 
@@ -155,16 +157,21 @@ readonly class User
   public function get_teams(): array
   {
     $teams_result = Database::query('
-      SELECT `teams`.`id`
+      SELECT `teams`.`id`, `teams`.`name`, `teams`.`description`
       FROM `_member_of_`
       JOIN `teams`
         ON `_member_of_`.`team_id` = `teams`.`id`
       WHERE `_member_of_`.`user_id` = ?
+      ORDER BY `teams`.`name`, `teams`.`description`, `teams`.`id`
     ', [$this->id])["result"];
 
     $teams = [];
     while ($team_result = $teams_result->fetch_assoc()) {
-      $teams[] = Team::get($team_result['id']);
+      $teams[] = new Team(
+        $team_result["id"],
+        $team_result["name"],
+        $team_result["description"]
+      );
     }
 
     return $teams;
@@ -176,14 +183,21 @@ readonly class User
   public function get_projects(): array
   {
     $projects_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `team_id`
       FROM `projects`
       WHERE `lead_id` = ?
+      ORDER BY `team_id`, `name`, `description`, `id`
     ', [$this->id])["result"];
 
     $projects = [];
     while ($project_result = $projects_result->fetch_assoc()) {
-      $projects[] = Project::get($project_result['id']);
+      $projects[] = new Project(
+        $project_result["id"],
+        $project_result["name"],
+        $project_result["description"],
+        $this,
+        Team::get($project_result["team_id"])
+      );
     }
 
     foreach ($this->get_tasks() as $task) {
@@ -201,14 +215,23 @@ readonly class User
   public function get_tasks(): array
   {
     $tasks_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `status`, `priority`, `project_id`
       FROM `tasks`
       WHERE `user_id` = ?
+      ORDER BY `project_id`, `priority`, `status`, `name`, `description`, `id`
     ', [$this->id])["result"];
 
     $tasks = [];
     while ($task_result = $tasks_result->fetch_assoc()) {
-      $tasks[] = Task::get($task_result['id']);
+      $tasks[] = new Task(
+        $task_result["id"],
+        $task_result["name"],
+        $task_result["description"],
+        Project::get($task_result["project_id"]),
+        TaskStatus::tryFrom($task_result["status"]),
+        TaskPriority::tryFrom($task_result["priority"]),
+        $this
+      );
     }
 
     return $tasks;

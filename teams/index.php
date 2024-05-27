@@ -35,13 +35,11 @@ if ($query) {
 </head>
 <body>
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
-
   <main>
     <section>
       <h2>Your Teams</h2>
       <?php require_once __DIR__ . '/../components/teams.php' ?>
     </section>
-
     <footer>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
@@ -112,7 +110,6 @@ if ($query) {
         </form>
       </div>
     </footer>
-
     <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
 </body>

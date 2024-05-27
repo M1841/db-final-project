@@ -11,20 +11,22 @@ if ($user === null) {
   exit();
 }
 
-if ($query = Request::get('search')) {
-  $teams = Team::search($query);
-  $projects = Project::search($query);
-  $tasks = Task::search($query);
-} else {
-  $teams = array_slice($user->get_teams(), 0, 4);
-  $projects = array_slice($user->get_projects(), 0, 4);
-  $tasks = array_slice($user->get_tasks(), 0, 4);
+try {
+  if ($query = Request::get('search')) {
+    $teams = Team::search($query);
+    $projects = Project::search($query);
+    $tasks = Task::search($query);
+  } else {
+    $teams = array_slice($user->get_teams(), 0, 4);
+    $projects = array_slice($user->get_projects(), 0, 4);
+    $tasks = array_slice($user->get_tasks(), 0, 4);
+  }
+} catch (Exception $err) {
+  Session::set('error', $err->getMessage());
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -40,7 +42,6 @@ if ($query = Request::get('search')) {
   <script src="./lib/tailwind.min.js"></script>
   <script src="./lib/flowbite.min.js"></script>
 </head>
-
 <body>
   <?php require_once __DIR__ . '/components/navbar.php'; ?>
   <main>

@@ -49,13 +49,11 @@ if ($query) {
 </head>
 <body>
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
-
   <main>
     <section>
       <h2>Your Tasks</h2>
       <?php require_once __DIR__ . '/../components/tasks.php' ?>
     </section>
-
     <footer>
       <button data-modal-target="search_modal" data-modal-toggle="search_modal">
         <i class="symbol">search</i>
@@ -65,7 +63,6 @@ if ($query) {
         <i class="symbol">add</i>
         Create a Task
       </button>
-
 
       <div id="search_modal" tabindex="-1" class="hidden">
         <form method="GET" action="./tasks">
@@ -166,6 +163,5 @@ if ($query) {
         </form>
       </div>
     </footer>
-
     <?php require_once __DIR__ . '/../components/error.php' ?>
 </body>

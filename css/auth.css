@@ -27,6 +27,25 @@ aside > h1 {
   gap: 0.25rem;
 }
 
+aside > a {
+  color: #fafafa66;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 100ms;
+}
+
+aside > a:visited {
+  color: #d4d4d8;
+}
+
+aside > a:hover {
+  color: #fafafa88;
+}
+
+aside > a:active {
+  color: #fafafa;
+}
+
 main {
   align-items: center;
   display: flex;

@@ -178,14 +178,23 @@ readonly class Project
   public function get_tasks(): array
   {
     $tasks_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `status`, `priority`, `user_id`
       FROM `tasks`
       WHERE `project_id` = ?
+      ORDER BY `user_id`, `priority`, `status`, `name`, `description`, `id`
     ', [$this->id])["result"];
 
     $tasks = [];
     while ($task_result = $tasks_result->fetch_assoc()) {
-      $tasks[] = Task::get($task_result['id']);
+      $tasks[] = new Task(
+        $task_result["id"],
+        $task_result["name"],
+        $task_result["description"],
+        $this,
+        TaskStatus::tryFrom($task_result["status"]),
+        TaskPriority::tryFrom($task_result["priority"]),
+        $task_result['user_id'] ? User::get($task_result['user_id']) : null
+      );
     }
 
     return $tasks;
@@ -241,20 +250,27 @@ readonly class Project
   ): array
   {
     $projects_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `team_id`, `lead_id`
       FROM `projects`
       WHERE (
         ? AND LOWER(`name`) LIKE ?
       ) OR (
         ? AND LOWER(`description`) LIKE ?
       )
+      ORDER BY `team_id`, `lead_id`, `name`, `description`, `id`
     ', [
       $in_name, strtolower('%' . $query . '%'),
       $in_description, strtolower('%' . $query . '%')
     ])["result"];
     $projects = [];
     foreach ($projects_result as $project_result) {
-      $projects[] = Project::get($project_result["id"]);
+      $projects[] = new Project(
+        $project_result["id"],
+        $project_result["name"],
+        $project_result["description"],
+        User::get($project_result["lead_id"]),
+        Team::get($project_result["team_id"])
+      );
     }
     return $projects;
   }

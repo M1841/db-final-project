@@ -53,7 +53,6 @@ try {
 </head>
 <body>
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
-
   <main>
     <header>
       <h1>
@@ -69,7 +68,6 @@ try {
         <?= $task->status->value ?>
       </span>
     </header>
-
     <footer>
       <button data-modal-target="edit_modal" data-modal-toggle="edit_modal">
         <i class="symbol">edit</i>

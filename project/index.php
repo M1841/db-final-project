@@ -53,7 +53,6 @@ try {
 </head>
 <body>
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
-
   <main>
     <header>
       <h1>
@@ -63,12 +62,10 @@ try {
       <p><?= $project->description ?></p>
       <span>Project lead: <?= $project->lead->name ?></span>
     </header>
-
     <section>
       <h2>Tasks</h2>
       <?php require_once __DIR__ . '/../components/tasks.php' ?>
     </section>
-
     <footer>
       <button data-modal-target="edit_modal" data-modal-toggle="edit_modal">
         <i class="symbol">edit</i>
@@ -160,7 +157,6 @@ try {
         </form>
       </div>
     </footer>
-
     <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
 </body>

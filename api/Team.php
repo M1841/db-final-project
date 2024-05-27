@@ -198,17 +198,21 @@ readonly class Team
   public function get_members(): array
   {
     $members_result = Database::query('
-      SELECT `users`.`id`
+      SELECT `users`.`id`, `users`.`name`
       FROM `_member_of_`
       JOIN `users`
         ON `_member_of_`.`user_id` = `users`.`id`
       WHERE `_member_of_`.`team_id` = ?
+      ORDER BY `users`.`name`, `users`.`id`
     ', [$this->id])["result"];
-
 
     $members = [];
     while ($member_result = $members_result->fetch_assoc()) {
-      $members[] = User::get($member_result['id']);
+      $members[] = new User(
+        $member_result["id"],
+        $member_result["name"],
+        ""
+      );
     }
 
     return $members;
@@ -220,14 +224,21 @@ readonly class Team
   public function get_projects(): array
   {
     $projects_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `lead_id`
       FROM `projects`
       WHERE `team_id` = ?
+      ORDER BY `lead_id`, `name`, `description`, `id`
     ', [$this->id])["result"];
 
     $projects = [];
     while ($project_result = $projects_result->fetch_assoc()) {
-      $projects[] = Project::get($project_result['id']);
+      $projects[] = new Project(
+        $project_result["id"],
+        $project_result["name"],
+        $project_result["description"],
+        User::get($project_result["lead_id"]),
+        $this
+      );
     }
 
     return $projects;
@@ -281,20 +292,25 @@ readonly class Team
   ): array
   {
     $teams_result = Database::query('
-      SELECT `id`
+      SELECT `id`, `name`, `description`
       FROM `teams`
       WHERE (
         ? AND LOWER(`name`) LIKE ?
       ) OR (
         ? AND LOWER(`description`) LIKE ?
       )
+      ORDER BY `name`, `description`, `id`
     ', [
       $in_name, strtolower('%' . $query . '%'),
       $in_description, strtolower('%' . $query . '%')
     ])["result"];
     $teams = [];
     foreach ($teams_result as $team_result) {
-      $teams[] = Team::get($team_result["id"]);
+      $teams[] = new Team(
+        $team_result["id"],
+        $team_result["name"],
+        $team_result["description"]
+      );
     }
     return $teams;
   }

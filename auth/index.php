@@ -10,10 +10,8 @@ if ($auth_form = Session::get('auth_form')) {
   $is_registering = $auth_form['action'] === 'register';
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8"/>
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -24,15 +22,16 @@ if ($auth_form = Session::get('auth_form')) {
   <link rel="stylesheet" href="../css/base.css"/>
   <link rel="stylesheet" href="../css/auth.css"/>
 </head>
-
 <body>
   <aside>
     <h1>
       <i class="symbol">inventory</i>
       AppName
     </h1>
+    <a href="https://github.com/m1841/db-final-project" target="_blank">
+      © Mihai Mureșan 2024
+    </a>
   </aside>
-
   <main id="app">
     <h1>
       <i class="symbol">inventory</i>
@@ -44,7 +43,6 @@ if ($auth_form = Session::get('auth_form')) {
     <form method="POST" action="../api/User.php">
       <input type="hidden" name="action" id="action" required
         value="<?= $is_registering ? 'register' : 'login' ?>"/>
-
       <label for="name">
         <input type="text" name="name" id="name" placeholder="Username"
           required minlength="3" maxlength="32" value="<?= $name ?>"/>
@@ -56,7 +54,6 @@ if ($auth_form = Session::get('auth_form')) {
             placeholder="Password" required minlength="8"
             maxlength="32" value="<?= $password ?>"/>
         </label>
-
         <button onclick="toggle_password_visibility()" type="button"
           class="symbol" id="password_visibility_toggle">
           visibility_off
@@ -77,7 +74,6 @@ if ($auth_form = Session::get('auth_form')) {
     }
     ?>
   </main>
-
   <script>
     function toggle_action() {
       let action = document.getElementById("action");

@@ -22,6 +22,10 @@ nav > h1 > a {
   gap: 0.25rem;
 }
 
+nav > h1 > a:focus-visible {
+  outline: 0 solid transparent;
+}
+
 nav > a {
   color: #71717a;
   font-size: 0.875rem;

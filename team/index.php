@@ -53,7 +53,6 @@ try {
 </head>
 <body>
   <?php require_once __DIR__ . '/../components/navbar.php' ?>
-
   <main>
     <header>
       <h1>
@@ -81,7 +80,6 @@ try {
         <?php require_once __DIR__ . '/../components/projects.php' ?>
       </section>
     </div>
-
     <footer>
       <button onclick="copy_team_code()" id="copy_button">
         <i class="symbol">content_copy</i>
@@ -118,7 +116,6 @@ try {
           <input type="submit" value="Edit"/>
         </form>
       </div>
-
       <div id="create_modal" tabindex="-1" class="hidden">
         <form method="POST" action="../api/Project.php">
           <h3>Create a Project</h3>
@@ -136,7 +133,6 @@ try {
           <input type="submit" value="Create"/>
         </form>
       </div>
-
       <div id="delete_modal" tabindex="-1" class="hidden">
         <form method="POST" action="../api/Team.php">
           <h3>Are you sure?</h3>
@@ -149,10 +145,8 @@ try {
         </form>
       </div>
     </footer>
-
     <?php require_once __DIR__ . '/../components/error.php' ?>
   </main>
-
   <script>
     function copy_team_code() {
       const temp_textarea = document.createElement("textarea");

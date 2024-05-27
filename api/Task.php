@@ -307,7 +307,7 @@ readonly class Task
     $statuses_placeholder = implode(',', array_fill(0, count($statuses), '?'));
     $priorities_placeholder = implode(',', array_fill(0, count($priorities), '?'));
     $tasks_result = Database::query("
-      SELECT `id`
+      SELECT `id`, `name`, `description`, `status`, `priority`, `project_id`, `user_id`
       FROM `tasks`
       WHERE ((
           ? AND LOWER(`name`) LIKE ?
@@ -319,6 +319,7 @@ readonly class Task
       ) AND (
         ? OR `priority` IN ($priorities_placeholder)
       )
+      ORDER BY `user_id`, `priority`, `status`, `name`, `description`, `id`
     ", array_merge(
       [$in_name, strtolower('%' . $query . '%'),
         $in_description, strtolower('%' . $query . '%')],
@@ -327,7 +328,15 @@ readonly class Task
     ))["result"];
     $tasks = [];
     foreach ($tasks_result as $task_result) {
-      $tasks[] = Task::get($task_result['id']);
+      $tasks[] = new Task(
+        $task_result["id"],
+        $task_result["name"],
+        $task_result["description"],
+        Project::get($task_result["project_id"]),
+        TaskStatus::tryFrom($task_result["status"]),
+        TaskPriority::tryFrom($task_result["priority"]),
+        $task_result['user_id'] ? User::get($task_result['user_id']) : null
+      );
     }
     return $tasks;
   }
