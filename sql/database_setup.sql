@@ -53,6 +53,8 @@ CREATE TABLE `projects`
     FOREIGN KEY (`lead_id`) REFERENCES `users` (`id`)
       ON DELETE CASCADE,
 
+  -- user must be in the same team as the project
+
   CONSTRAINT `fk_project_team`
     FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`)
       ON DELETE CASCADE
@@ -75,4 +77,6 @@ CREATE TABLE `tasks`
   CONSTRAINT `fk__part_of_project`
     FOREIGN KEY (`project_id`) REFERENCES `projects` (`id`)
       ON DELETE CASCADE
+
+  -- user and project must be from the same team
 );
