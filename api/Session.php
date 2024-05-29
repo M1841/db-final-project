@@ -20,20 +20,20 @@ abstract class Session
     $_SESSION[$key] = $value;
   }
 
-  public static function get(?string $key = NULL)
+  public static function get(?string $key = null): mixed
   {
     if (!isset($key)) {
       return $_SESSION;
     } else {
       if (!isset($_SESSION[$key])) {
-        return NULL;
+        return null;
       } else {
         return $_SESSION[$key];
       }
     }
   }
 
-  public static function unset(?string $key = NULL): void
+  public static function unset(?string $key = null): void
   {
     if (!isset($key)) {
       session_unset();
